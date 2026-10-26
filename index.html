@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FlyNext AI - Travel Planner &amp; Budget Master</title>
+<meta name="description" content="FlyNext AI: smart travel planner with budget breakdown, hourly itinerary, map, packing list and cute PDF export.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<style>
+:root{
+  --p5:#FF85A1;--p3:#FFB3C6;--p1:#FFF0F5;
+  --b5:#4EA8DE;--b3:#90E0EF;--b1:#E0F4FF;
+  --ink:#3a3556;--mut:#7b7798;--ok:#2fbf8f;--bad:#ef5d7a;--warn:#ffb86b;--lav:#9B8CFF;
+  --glass:rgba(255,255,255,.62);--line:rgba(255,255,255,.8);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink);background:linear-gradient(135deg,var(--p1) 0%,var(--b1) 100%);background-attachment:fixed;min-height:100vh;line-height:1.5;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4,.fred{font-family:'Fredoka','Plus Jakarta Sans',sans-serif;font-weight:600}
+button,input,select{font-family:inherit;font-size:1rem;color:inherit}
+button{cursor:pointer}
+a{color:var(--b5)}
+.blobs{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.blobs i{position:absolute;border-radius:50%;filter:blur(70px);opacity:.55;animation:floaty 20s ease-in-out infinite}
+.blobs i:nth-child(1){width:420px;height:420px;background:var(--p3);top:-120px;left:-100px}
+.blobs i:nth-child(2){width:460px;height:460px;background:var(--b3);bottom:-140px;right:-120px;animation-delay:-7s}
+.blobs i:nth-child(3){width:300px;height:300px;background:#ffd6e5;top:42%;left:46%;animation-delay:-13s;opacity:.4}
+@keyframes floaty{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,-30px) scale(1.08)}}
+
+.glass{background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1.5px solid var(--line);border-radius:24px;box-shadow:0 10px 30px rgba(255,133,161,.18),0 4px 16px rgba(78,168,222,.14)}
+.card{padding:22px}
+.wrap{max-width:1380px;margin:0 auto;padding:16px 16px 40px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 20px;margin-bottom:18px}
+.logo{display:flex;align-items:center;gap:12px}
+.logo .mark{width:48px;height:48px;border-radius:16px;background:linear-gradient(135deg,var(--p5),var(--b5));display:grid;place-items:center;color:#fff;font-size:20px;box-shadow:0 8px 18px rgba(255,133,161,.4);transform:rotate(-6deg)}
+.logo h1{font-size:1.45rem;line-height:1.1;background:linear-gradient(90deg,var(--p5),var(--b5));-webkit-background-clip:text;background-clip:text;color:transparent}
+.logo small{display:block;color:var(--mut);font-weight:600;font-size:.78rem}
+.btn{border:0;border-radius:999px;padding:11px 20px;font-weight:700;display:inline-flex;align-items:center;gap:8px;text-decoration:none;transition:transform .2s,box-shadow .2s,filter .2s;line-height:1.2}
+.btn:hover{transform:translateY(-2px)}
+.btn:active{transform:translateY(0) scale(.98)}
+.btn-primary{background:linear-gradient(90deg,var(--p5),var(--b5));color:#fff;box-shadow:0 10px 22px rgba(255,133,161,.38)}
+.btn-primary:hover{box-shadow:0 14px 28px rgba(78,168,222,.4);filter:saturate(1.1)}
+.btn-soft{background:rgba(255,255,255,.85);color:var(--ink);border:1.5px solid var(--p3)}
+.btn-soft:hover{background:#fff;box-shadow:0 8px 18px rgba(255,133,161,.25)}
+.btn-blue{background:linear-gradient(90deg,var(--b5),var(--b3));color:#fff;box-shadow:0 10px 22px rgba(78,168,222,.35)}
+.btn-pink{background:linear-gradient(90deg,var(--p5),var(--p3));color:#fff;box-shadow:0 10px 22px rgba(255,133,161,.35)}
+.btn-sm{padding:7px 13px;font-size:.82rem}
+.btn-block{width:100%;justify-content:center;padding:15px 20px;font-size:1.08rem}
+
+.layout{display:grid;grid-template-columns:minmax(330px,420px) minmax(0,1fr);gap:20px;align-items:start}
+aside{display:flex;flex-direction:column;gap:20px}
+@media(min-width:1001px){aside{position:sticky;top:14px;max-height:calc(100vh - 28px);overflow-y:auto;padding:2px 4px 2px 2px;scrollbar-width:thin}}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}}
+.sec-title{display:flex;align-items:center;gap:10px;font-size:1.2rem;margin-bottom:14px}
+.sec-title i{color:var(--p5)}
+.sec-title .badge{margin-left:auto}
+
+.field{display:flex;flex-direction:column;gap:7px;margin-bottom:15px}
+.lbl{font-weight:800;font-size:.74rem;color:var(--mut);text-transform:uppercase;letter-spacing:.07em}
+.lbl em{font-style:normal;text-transform:none;letter-spacing:0;font-weight:600;color:var(--b5)}
+input[type=text],input[type=number],input[type=date]{width:100%;padding:12px 14px;border-radius:16px;border:1.5px solid rgba(255,179,198,.8);background:rgba(255,255,255,.88);outline:none;transition:border-color .2s,box-shadow .2s;font-weight:600}
+input:focus{border-color:var(--b5);box-shadow:0 0 0 4px rgba(78,168,222,.18)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pills{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pill input{position:absolute;opacity:0;pointer-events:none}
+.pill{position:relative}
+.pill span{display:block;text-align:center;padding:11px 8px;border-radius:16px;border:1.5px solid var(--p3);background:rgba(255,255,255,.7);cursor:pointer;font-weight:700;font-size:.88rem;transition:all .2s}
+.pill input:checked+span{background:linear-gradient(90deg,var(--p5),var(--b5));color:#fff;border-color:transparent;box-shadow:0 8px 18px rgba(255,133,161,.35)}
+.pill input:focus-visible+span{outline:3px solid var(--b3)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--b3);background:rgba(255,255,255,.75);padding:8px 13px;border-radius:999px;font-weight:700;font-size:.84rem;transition:all .2s}
+.chip:hover{transform:translateY(-2px)}
+.chip.on{background:linear-gradient(90deg,var(--b5),var(--b3));color:#fff;border-color:transparent;box-shadow:0 8px 16px rgba(78,168,222,.33)}
+.hint{font-size:.78rem;color:var(--mut);font-weight:600}
+.tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:9px}
+.tier{position:relative;display:block}
+.tier input{position:absolute;opacity:0;pointer-events:none}
+.tier .tc{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;padding:12px 6px;border-radius:18px;border:1.5px solid var(--p3);background:rgba(255,255,255,.72);cursor:pointer;transition:all .2s;height:100%}
+.tier .tc b{font-size:.84rem;line-height:1.2}
+.tier .tc small{font-size:.7rem;color:var(--mut);font-weight:600;line-height:1.2}
+.tier .tc .em{font-size:1.5rem}
+.tier input:checked+.tc{background:linear-gradient(160deg,#fff,var(--p1));border-color:var(--p5);box-shadow:0 10px 22px rgba(255,133,161,.32);transform:translateY(-3px)}
+.tier input:focus-visible+.tc{outline:3px solid var(--b3)}
+
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:999px;background:var(--p1);color:var(--p5);font-weight:800;font-size:.76rem;border:1px solid var(--p3)}
+.badge.blue{background:var(--b1);color:var(--b5);border-color:var(--b3)}
+.badge.ok{background:#e4fbf2;color:var(--ok);border-color:#a8ecd2}
+.badge.bad{background:#ffe6ec;color:var(--bad);border-color:#ffb8c7}
+
+.saved-list{display:flex;flex-direction:column;gap:10px;max-height:380px;overflow:auto;padding-right:2px}
+.trip{background:rgba(255,255,255,.75);border:1.5px solid rgba(255,179,198,.55);border-radius:18px;padding:12px 14px}
+.trip h4{font-size:1rem;margin-bottom:2px;word-break:break-word}
+.trip p{font-size:.78rem;color:var(--mut);font-weight:600;margin-bottom:9px}
+.trip .acts{display:flex;gap:6px;flex-wrap:wrap}
+.empty{text-align:center;color:var(--mut);padding:18px 8px;font-weight:600;font-size:.9rem}
+.empty .big{font-size:2rem;display:block;margin-bottom:4px}
+
+#dash{display:flex;flex-direction:column;gap:20px;min-width:0}
+.hero{padding:26px;position:relative;overflow:hidden}
+.hero::after{content:"✈";position:absolute;right:-10px;top:-24px;font-size:9rem;color:rgba(78,168,222,.08);transform:rotate(18deg);pointer-events:none}
+.hero-top{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;align-items:flex-start}
+.eyebrow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.hero h2{font-size:clamp(1.7rem,4vw,2.5rem);line-height:1.1}
+.hero p.sub{color:var(--mut);font-weight:600;margin-top:6px}
+.total-box{background:linear-gradient(135deg,var(--p5),var(--b5));color:#fff;border-radius:22px;padding:14px 22px;text-align:right;box-shadow:0 12px 24px rgba(78,168,222,.33);min-width:200px}
+.total-box span{font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;opacity:.92;display:block}
+.total-box b{font-family:'Fredoka',sans-serif;font-size:1.75rem;display:block;line-height:1.2}
+.total-box small{font-weight:600;opacity:.95}
+.banner{margin-top:18px;padding:14px 16px;border-radius:18px;font-weight:600;font-size:.94rem;border:1.5px solid}
+.banner.explore{background:var(--b1);border-color:var(--b3)}
+.banner.safe{background:#e4fbf2;border-color:#a8ecd2}
+.banner.over{background:#fff0f3;border-color:#ffb8c7}
+.banner .tips2{margin-top:6px;font-size:.86rem;color:var(--mut)}
+.meter{height:10px;background:rgba(255,255,255,.8);border-radius:99px;overflow:hidden;margin-top:9px;border:1px solid rgba(0,0,0,.04)}
+.meter i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--ok),var(--b3))}
+.banner.over .meter i{background:linear-gradient(90deg,var(--warn),var(--bad))}
+.hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+
+.alts{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 10px;scrollbar-width:thin}
+.alt{flex:0 0 auto;border:1.5px solid var(--p3);background:rgba(255,255,255,.8);border-radius:18px;padding:10px 14px;text-align:left;transition:all .2s;min-width:150px}
+.alt:hover{transform:translateY(-3px);box-shadow:0 10px 20px rgba(255,133,161,.25)}
+.alt.on{background:linear-gradient(160deg,#fff,var(--b1));border-color:var(--b5);box-shadow:0 10px 22px rgba(78,168,222,.3)}
+.alt b{display:block;font-size:.95rem}
+.alt small{display:block;color:var(--mut);font-weight:700;font-size:.76rem}
+
+.tier-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:760px){.tier-cards{grid-template-columns:1fr}}
+.tcard{background:rgba(255,255,255,.78);border:1.5px solid var(--p3);border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:8px;position:relative;transition:transform .25s,box-shadow .25s}
+.tcard:hover{transform:translateY(-4px);box-shadow:0 14px 28px rgba(255,133,161,.25)}
+.tcard.sel{border-color:var(--b5);background:linear-gradient(170deg,#fff,var(--b1));box-shadow:0 14px 28px rgba(78,168,222,.28)}
+.tcard .em{font-size:1.9rem}
+.tcard h4{font-size:1.1rem}
+.tcard .price{font-family:'Fredoka',sans-serif;font-size:1.5rem;font-weight:600;color:var(--p5);line-height:1.15}
+.tcard ul{list-style:none;font-size:.82rem;font-weight:600;color:var(--mut);display:flex;flex-direction:column;gap:3px}
+.tcard li{display:flex;justify-content:space-between;gap:8px}
+.tcard li b{color:var(--ink)}
+.tcard .btn{margin-top:auto;justify-content:center}
+
+.bars{display:flex;flex-direction:column;gap:15px}
+.bar-row .top{display:flex;justify-content:space-between;gap:10px;font-weight:700;font-size:.92rem;margin-bottom:6px;flex-wrap:wrap}
+.bar-row .top span:last-child{color:var(--mut)}
+.track{height:16px;background:rgba(255,255,255,.85);border-radius:99px;overflow:hidden;border:1px solid rgba(255,179,198,.4)}
+.fill{height:100%;width:0;border-radius:99px;transition:width 1.1s cubic-bezier(.22,1,.36,1);background:linear-gradient(90deg,var(--p5),var(--p3))}
+.fill.f2{background:linear-gradient(90deg,var(--b5),var(--b3))}
+.fill.f3{background:linear-gradient(90deg,#ffb86b,#ffd6a5)}
+.fill.f4{background:linear-gradient(90deg,var(--lav),#c9c1ff)}
+.buffer-note{margin-top:12px;font-size:.82rem;color:var(--mut);font-weight:600}
+
+#map{height:400px;border-radius:20px;overflow:hidden;border:2px solid #fff;z-index:1}
+.map-fail{height:100%;display:grid;place-items:center;text-align:center;padding:20px;background:var(--b1);font-weight:700;color:var(--mut)}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;font-size:.8rem;font-weight:700;color:var(--mut)}
+.pin{background:transparent;border:0}
+.pin-i{width:34px;height:34px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:grid;place-items:center;border:2.5px solid #fff;box-shadow:0 6px 12px rgba(0,0,0,.25)}
+.pin-i span{transform:rotate(45deg);font-size:15px;line-height:1}
+.leaflet-popup-content{font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;font-size:.84rem;line-height:1.45}
+
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:20px}
+.pack-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.pack-prog{flex:1;min-width:120px}
+.pack-grp{margin-bottom:14px}
+.pack-grp h4{font-size:.98rem;margin-bottom:6px}
+.pack-item{display:flex;gap:10px;align-items:flex-start;padding:7px 10px;border-radius:12px;font-size:.88rem;font-weight:600;cursor:pointer;transition:background .15s}
+.pack-item:hover{background:rgba(255,255,255,.75)}
+.pack-item input{appearance:none;-webkit-appearance:none;width:20px;height:20px;border-radius:7px;border:2px solid var(--p5);background:#fff;flex:0 0 auto;margin-top:1px;cursor:pointer;display:grid;place-items:center;transition:all .2s}
+.pack-item input:checked{background:linear-gradient(135deg,var(--p5),var(--b5));border-color:transparent}
+.pack-item input:checked::after{content:"✓";color:#fff;font-size:13px;font-weight:800}
+.pack-item input:checked+span{text-decoration:line-through;color:var(--mut)}
+.tip{display:flex;gap:12px;padding:11px 0;border-bottom:1px dashed rgba(255,133,161,.4);font-size:.88rem}
+.tip:last-child{border-bottom:0}
+.tip .ti{font-size:1.35rem;flex:0 0 32px;text-align:center}
+.tip b{display:block;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--mut)}
+.tip span{font-weight:600}
+
+.day-tabs{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 12px;scrollbar-width:thin}
+.dtab{flex:0 0 auto;border:1.5px solid var(--p3);background:rgba(255,255,255,.8);border-radius:16px;padding:8px 14px;font-weight:800;font-size:.85rem;transition:all .2s;text-align:center;line-height:1.25}
+.dtab small{display:block;font-weight:600;color:var(--mut);font-size:.7rem}
+.dtab.on{background:linear-gradient(90deg,var(--p5),var(--b5));color:#fff;border-color:transparent;box-shadow:0 8px 18px rgba(255,133,161,.35)}
+.dtab.on small{color:rgba(255,255,255,.9)}
+.day-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;margin:6px 0 10px}
+.day-head h3{font-size:1.25rem}
+.day-note{background:var(--b1);border:1px solid var(--b3);border-radius:14px;padding:9px 13px;font-size:.84rem;font-weight:600;margin-bottom:12px}
+.timeline{position:relative;display:flex;flex-direction:column;gap:12px}
+.slot{display:grid;grid-template-columns:64px 1fr;gap:12px;position:relative;animation:pop .45s ease both}
+@keyframes pop{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.slot .tm{display:flex;flex-direction:column;align-items:center}
+.slot .tm b{background:linear-gradient(135deg,var(--p5),var(--b5));color:#fff;border-radius:14px;padding:6px 0;width:100%;text-align:center;font-family:'Fredoka',sans-serif;font-size:.98rem;box-shadow:0 6px 14px rgba(255,133,161,.3)}
+.slot .tm::after{content:"";flex:1;width:2px;background:repeating-linear-gradient(to bottom,var(--p3) 0 6px,transparent 6px 12px);margin-top:6px}
+.slot:last-child .tm::after{display:none}
+.sbody{background:rgba(255,255,255,.8);border:1.5px solid rgba(255,255,255,.95);border-radius:20px;padding:14px 16px;box-shadow:0 6px 16px rgba(78,168,222,.1)}
+.sbody .tag{display:inline-block;font-size:.7rem;font-weight:800;padding:3px 10px;border-radius:99px;margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
+.t-f{background:#ffe6ec;color:var(--p5)}.t-s{background:var(--b1);color:var(--b5)}.t-v{background:#fff1e0;color:#e8913a}.t-n{background:#efecff;color:var(--lav)}.t-h{background:#e4fbf2;color:var(--ok)}
+.sbody h4{font-size:1.06rem;line-height:1.25;margin-bottom:3px}
+.rate{font-size:.82rem;font-weight:700;color:#d98a00;margin-bottom:8px}
+.meta{display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+.mc{font-size:.76rem;font-weight:700;padding:5px 10px;border-radius:99px;background:var(--p1);border:1px solid var(--p3)}
+.mc.tr{background:var(--b1);border-color:var(--b3)}
+.mc.free{background:#e4fbf2;border-color:#a8ecd2}
+.mc.link{text-decoration:none;color:var(--ink);background:#fff}
+.mc.link:hover{background:var(--b1)}
+.day-foot{margin-top:12px;text-align:right;font-weight:800}
+
+.footer{text-align:center;color:var(--mut);font-weight:600;font-size:.82rem;margin-top:26px}
+
+.modal{position:fixed;inset:0;background:rgba(58,53,86,.38);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:16px;z-index:1000}
+.modal.open{display:flex}
+.mbox{width:min(760px,100%);max-height:92vh;overflow:auto;padding:26px;background:rgba(255,255,255,.93);position:relative;animation:pop .35s ease}
+.mbox.sm{width:min(460px,100%)}
+.mclose{position:absolute;top:14px;right:14px;width:38px;height:38px;border-radius:50%;border:0;background:var(--p1);color:var(--p5);font-size:1rem}
+.mclose:hover{background:var(--p3);color:#fff}
+.hub-actions{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 18px}
+.steps{display:flex;flex-direction:column;gap:12px;counter-reset:s}
+.step{display:grid;grid-template-columns:44px 1fr;gap:12px;background:linear-gradient(135deg,#fff,var(--p1));border:1.5px solid var(--p3);border-radius:18px;padding:14px}
+.step .n{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--p5),var(--b5));color:#fff;display:grid;place-items:center;font-family:'Fredoka',sans-serif;font-size:1.2rem}
+.step b{display:block;margin-bottom:2px}
+.step p{font-size:.88rem;color:var(--mut);font-weight:600}
+.mock{margin-top:9px;background:#fff;border:1.5px solid #e1e6ee;border-radius:12px;padding:10px 12px;font-size:.78rem;font-weight:700;color:#5f6368;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.mock .mt{padding:4px 10px;border-radius:99px;background:#f1f3f4}
+.mock .mt.on{background:#e8f0fe;color:#1a73e8}
+.mock code{background:#f1f3f4;padding:3px 8px;border-radius:8px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.74rem}
+.note{font-size:.82rem;font-weight:600;color:var(--mut);background:var(--b1);border:1px solid var(--b3);border-radius:14px;padding:10px 13px;margin-top:14px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(30px);background:linear-gradient(90deg,var(--p5),var(--b5));color:#fff;padding:12px 22px;border-radius:99px;font-weight:700;box-shadow:0 12px 28px rgba(78,168,222,.4);opacity:0;pointer-events:none;transition:all .35s;z-index:2000;max-width:92vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(max-width:600px){
+  .wrap{padding:10px 10px 30px}
+  .card,.hero{padding:16px}
+  .topbar{padding:12px 14px}
+  .row2{grid-template-columns:1fr}
+  .total-box{text-align:left;width:100%}
+  .slot{grid-template-columns:54px 1fr;gap:9px}
+  .slot .tm b{font-size:.86rem}
+  #map{height:320px}
+  .mbox{padding:20px 16px}
+  .hero-actions .btn{flex:1 1 100%;justify-content:center}
+}
+
+/* ---------- Cute printable document ---------- */
+#printDoc{display:none}
+.pd{font-family:'Plus Jakarta Sans',Arial,sans-serif;color:#3a3556;font-size:11.5px;line-height:1.45}
+.pd h2{font-family:'Fredoka',Arial,sans-serif;font-size:17px;margin:16px 0 8px;color:#e0587a;border-bottom:2px dashed #FFB3C6;padding-bottom:4px}
+.pd-cover{background:linear-gradient(120deg,#FF85A1,#4EA8DE);color:#fff;border-radius:18px;padding:20px 24px}
+.pd-brand{font-weight:800;letter-spacing:.08em;font-size:12px;opacity:.95}
+.pd-cover h1{font-family:'Fredoka',Arial,sans-serif;font-size:30px;margin:4px 0}
+.pd-cover p{font-size:13px;font-weight:600}
+.pd-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.pd-stat{background:#FFF0F5;border:1.5px solid #FFB3C6;border-radius:12px;padding:8px 10px}
+.pd-stat:nth-child(even){background:#E0F4FF;border-color:#90E0EF}
+.pd-stat small{display:block;font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:#7b7798;font-weight:700}
+.pd-stat b{font-size:13px}
+.pd-bar{display:grid;grid-template-columns:150px 1fr 120px;gap:8px;align-items:center;margin:5px 0}
+.pd-track{height:11px;border-radius:9px;background:#fde4ec;overflow:hidden}
+.pd-track i{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,#FF85A1,#4EA8DE)}
+.pd-cols{columns:3;column-gap:16px}
+.pd-cols h4{font-size:12px;margin:6px 0 3px;color:#4EA8DE;break-after:avoid}
+.pd-cols div{break-inside:avoid;margin-bottom:4px}
+.pd-tips{display:grid;grid-template-columns:1fr 1fr;gap:6px 16px}
+.pd-day{break-inside:avoid;page-break-inside:avoid;margin-bottom:12px;border:1.5px solid #FFB3C6;border-radius:14px;overflow:hidden}
+.pd-day h3{font-family:'Fredoka',Arial,sans-serif;background:linear-gradient(90deg,#FFB3C6,#90E0EF);color:#3a3556;margin:0;padding:7px 12px;font-size:14px;display:flex;justify-content:space-between}
+.pd-day table{width:100%;border-collapse:collapse}
+.pd-day td{padding:5px 8px;border-top:1px solid #ffe0ea;vertical-align:top;font-size:10.5px}
+.pd-day tr:nth-child(even) td{background:#f6fbff}
+.pd-day td:first-child{font-weight:800;color:#e0587a;white-space:nowrap}
+.pd-foot{margin-top:14px;text-align:center;color:#7b7798;font-size:10px}
+@media print{
+  @page{size:A4;margin:10mm}
+  html,body{background:#fff !important}
+  .blobs,#app,.modal,.toast{display:none !important}
+  #printDoc{display:block !important}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<div class="blobs"><i></i><i></i><i></i></div>
+
+<div id="app" class="wrap">
+  <header class="topbar glass">
+    <div class="logo">
+      <div class="mark"><i class="fa-solid fa-plane-departure"></i></div>
+      <div>
+        <h1>FlyNext AI</h1>
+        <small>Travel Planner &amp; Budget Master</small>
+      </div>
+    </div>
+    <button class="btn btn-soft" id="openHub" type="button"><i class="fa-solid fa-code"></i> Code &amp; Export Hub</button>
+  </header>
+
+  <div class="layout">
+    <aside>
+      <form id="planForm" class="glass card" autocomplete="off" novalidate>
+        <h2 class="sec-title"><i class="fa-solid fa-wand-magic-sparkles"></i> Plan Your Trip</h2>
+
+        <div class="field">
+          <label class="lbl" for="origin">📍 Origin City</label>
+          <input type="text" id="origin" value="Medan" list="cities" placeholder="e.g. Medan">
+          <datalist id="cities">
+            <option value="Medan"><option value="Jakarta"><option value="Surabaya"><option value="Bandung"><option value="Denpasar"><option value="Yogyakarta"><option value="Makassar"><option value="Palembang"><option value="Batam"><option value="Pekanbaru"><option value="Padang"><option value="Banda Aceh"><option value="Semarang">
+          </datalist>
+        </div>
+
+        <div class="field">
+          <span class="lbl">🧭 Scope</span>
+          <div class="pills">
+            <label class="pill"><input type="radio" name="scope" value="local" checked><span>🇮🇩 Local (Indonesia)</span></label>
+            <label class="pill"><input type="radio" name="scope" value="intl"><span>🌏 International (Global)</span></label>
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="lbl">✨ Travel Vibe <em>(pick any, or none = surprise me)</em></span>
+          <div class="chips" id="vibeChips">
+            <button type="button" class="chip" data-v="b" aria-pressed="false">🏝️ Beach &amp; Tropical</button>
+            <button type="button" class="chip" data-v="m" aria-pressed="false">🏛️ Culture &amp; Heritage</button>
+            <button type="button" class="chip" data-v="c" aria-pressed="false">🏙️ Modern City &amp; Shopping</button>
+            <button type="button" class="chip" data-v="n" aria-pressed="false">⛰️ Nature &amp; Adventure</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="lbl" for="budget">💰 Total Budget (IDR) <em>optional</em></label>
+          <input type="number" id="budget" min="0" step="100000" inputmode="numeric" placeholder="Leave empty for Explorer Mode 🧭">
+          <span class="hint">Empty = compare all tiers. Filled = we check if it's safe or exceeded.</span>
+        </div>
+
+        <div class="row2">
+          <div class="field">
+            <label class="lbl" for="date">🗓️ Departure Date</label>
+            <input type="date" id="date">
+          </div>
+          <div class="field">
+            <label class="lbl" for="days">⏳ Duration (days)</label>
+            <input type="number" id="days" min="1" max="14" value="4" inputmode="numeric">
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="lbl">🎀 Travel Tier</span>
+          <div class="tiers">
+            <label class="tier"><input type="radio" name="tier" value="0"><span class="tc"><span class="em">🎒</span><b>Backpacker</b><small>Budget</small></span></label>
+            <label class="tier"><input type="radio" name="tier" value="1" checked><span class="tc"><span class="em">☕</span><b>Chill</b><small>Aesthetic</small></span></label>
+            <label class="tier"><input type="radio" name="tier" value="2"><span class="tc"><span class="em">💎</span><b>Sultan</b><small>Luxury</small></span></label>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" id="planBtn">Plan My Trip Now! ✈️</button>
+      </form>
+
+      <section class="glass card" id="savedPanel">
+        <h2 class="sec-title"><i class="fa-solid fa-heart"></i> Saved Trips <span class="badge blue" id="savedCount">0</span></h2>
+        <div class="saved-list" id="savedList"></div>
+      </section>
+    </aside>
+
+    <section id="dash" aria-live="polite"></section>
+  </div>
+
+  <p class="footer">Made with 💖 by FlyNext AI · Prices &amp; ratings are rounded crowdsourced estimates — always double-check before booking.</p>
+</div>
+
+<!-- Save modal -->
+<div class="modal" id="saveModal" role="dialog" aria-modal="true" aria-label="Save trip">
+  <div class="mbox sm glass">
+    <button class="mclose" type="button" data-close aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    <h2 class="sec-title"><i class="fa-solid fa-heart"></i> Save This Trip</h2>
+    <div class="field">
+      <label class="lbl" for="tripName">Name your itinerary</label>
+      <input type="text" id="tripName" maxlength="60" placeholder="Rancangan 1: Tokyo Spring">
+    </div>
+    <div class="hub-actions" style="margin-bottom:0">
+      <button class="btn btn-primary" id="confirmSave" type="button"><i class="fa-solid fa-floppy-disk"></i> Save Trip</button>
+      <button class="btn btn-soft" type="button" data-close>Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Code & Export Hub -->
+<div class="modal" id="hubModal" role="dialog" aria-modal="true" aria-label="Code and export hub">
+  <div class="mbox glass">
+    <button class="mclose" type="button" data-close aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    <h2 class="sec-title"><i class="fa-solid fa-code"></i> Code &amp; Export Hub</h2>
+    <p class="hint" style="font-size:.9rem">This whole app is ONE file (<span id="codeSize">…</span>). Copy it or download it, then show it off in your portfolio.</p>
+    <div class="hub-actions">
+      <button class="btn btn-primary" id="copyCode" type="button">📋 Copy Complete Code</button>
+      <button class="btn btn-blue" id="dlCode" type="button">💾 Download index.html</button>
+    </div>
+    <h3 class="fred" style="margin-bottom:10px">📖 Embed in Google Sites (live portfolio)</h3>
+    <div class="steps">
+      <div class="step"><div class="n">1</div><div><b>Get the code</b><p>Click <b style="display:inline">Copy Complete Code</b> above (or download <code>index.html</code> and open it in a text editor, then copy everything).</p></div></div>
+      <div class="step"><div class="n">2</div><div><b>Open your Google Site</b><p>Go to <b style="display:inline">sites.google.com</b>, open your portfolio site (or create a new one) and select the page where the project should appear.</p></div></div>
+      <div class="step"><div class="n">3</div><div><b>Insert → Embed</b><p>In the right-side panel, open the <b style="display:inline">Insert</b> tab and click <b style="display:inline">Embed</b>.</p>
+        <div class="mock"><span class="mt">Insert</span><span class="mt">Pages</span><span class="mt">Themes</span> → <span class="mt on">📎 Embed</span></div></div></div>
+      <div class="step"><div class="n">4</div><div><b>Choose "Embed code"</b><p>In the popup, switch from the “By URL” tab to the <b style="display:inline">Embed code</b> tab.</p>
+        <div class="mock"><span class="mt">By URL</span><span class="mt on">Embed code</span><code>&lt;html&gt; … paste here … &lt;/html&gt;</code></div></div></div>
+      <div class="step"><div class="n">5</div><div><b>Paste &amp; Insert</b><p>Press <b style="display:inline">Ctrl + V</b> (or Cmd + V) to paste the code, click <b style="display:inline">Next</b>, then <b style="display:inline">Insert</b>.</p></div></div>
+      <div class="step"><div class="n">6</div><div><b>Resize &amp; Publish</b><p>Drag the embed box to full width and make it tall (900px+). Click <b style="display:inline">Publish</b> and share your link. Your visitors can plan trips live! 🎉</p></div></div>
+    </div>
+    <div class="note">💡 If Google Sites says the code is too large, upload <code>index.html</code> to GitHub Pages or Netlify and use <b>Embed → By URL</b> instead. Saved trips live in each visitor's own browser (localStorage). The PDF button works best when the site is opened in its own tab.</div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+<div id="printDoc"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+(function(){
+'use strict';
+/* Capture the page source BEFORE the app renders anything (used by the Code & Export Hub). */
+var SOURCE_HTML = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+
+/* ---------- helpers ---------- */
+var $ = function(s,r){return (r||document).querySelector(s);};
+var $$ = function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));};
+var fmt = function(n){return 'Rp ' + Math.round(n).toLocaleString('id-ID');};
+var rnd = function(n){return Math.round(n/1000)*1000;};
+var esc = function(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+var pad = function(n){return (n<10?'0':'')+n;};
+function toDate(str){var p=str.split('-');return new Date(+p[0],+p[1]-1,+p[2],12);}
+function ymd(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function addDays(str,n){var d=toDate(str);d.setDate(d.getDate()+n);return ymd(d);}
+function pretty(str){return toDate(str).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'});}
+function prettyShort(str){return toDate(str).toLocaleDateString('en-GB',{day:'numeric',month:'short'});}
+function defaultDate(){var d=new Date();d.setDate(d.getDate()+30);return ymd(d);}
+function ratingTxt(r,rv){var k=rv>=10?Math.round(rv):rv;return '⭐ '+r.toFixed(1)+'/5 · '+(rv<1?Math.round(rv*1000)+' reviews':k+'K+ reviews');}
+function mapsLink(lat,lng){return 'https://www.google.com/maps/search/?api=1&query='+lat+','+lng;}
+function trEmoji(m){
+  if(/boat|ferry|speed|phinisi|cruise|charter boat/i.test(m)) return '🚤';
+  if(/metro|mrt|lrt|subway|skytrain|bts|train|krl|itx/i.test(m)) return '🚇';
+  if(/bus|transjakarta|angkot|songthaew|cidomo/i.test(m)) return '🚌';
+  if(/scooter|bike|ojek/i.test(m)) return '🛵';
+  if(/walk|becak/i.test(m)) return '🚶';
+  if(/taxi|grab|bolt|car|driver|limo|chauffeur|van|kakao|tuk/i.test(m)) return '🚕';
+  return '🚗';
+}
+var toastTimer;
+function toast(msg){var t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.classList.remove('show');},2800);}
+function store(key,val){try{if(val===undefined){var r=localStorage.getItem(key);return r?JSON.parse(r):null;}localStorage.setItem(key,JSON.stringify(val));}catch(e){return null;}}
+function downloadBlob(name,text,type){
+  var blob=new Blob([text],{type:type||'text/plain'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;
+  document.body.appendChild(a);a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},500);
+}
+function copyText(text){
+  function fallback(){
+    var ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();var ok=false;
+    try{ok=document.execCommand('copy');}catch(e){}
+    ta.remove();return ok;
+  }
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    return navigator.clipboard.writeText(text).then(function(){return true;},function(){return fallback();});
+  }
+  return Promise.resolve(fallback());
+}
+
+/* ---------- tiers ---------- */
+var TIERS=[
+  {k:'b',name:'Backpacker',emoji:'🎒',sub:'Budget & hostels',flightX:1,mealX:.55,tixX:1,nightX:.7,dinnerX:.6,hr:4.2,hrv:3,hotel:'your hostel / guesthouse in {d}'},
+  {k:'c',name:'Chill',emoji:'☕',sub:'Aesthetic & comfy',flightX:1.3,mealX:1,tixX:1,nightX:1,dinnerX:1,hr:4.5,hrv:8,hotel:'your boutique stay in {d}'},
+  {k:'l',name:'Sultan',emoji:'💎',sub:'Luxury & VIP',flightX:3,mealX:2.2,tixX:1.4,nightX:2,dinnerX:2.4,hr:4.8,hrv:12,hotel:'your 5★ hotel suite in {d}'}
+];
+var VIBE_LABEL={b:'🏝️ Beach & Tropical',m:'🏛️ Culture & Heritage',c:'🏙️ Modern City & Shopping',n:'⛰️ Nature & Adventure'};
+var ORIGIN_X={'medan':1,'jakarta':1,'surabaya':1.05,'bandung':1,'denpasar':.95,'bali':.95,'yogyakarta':1,'makassar':1.15,'palembang':1,'batam':.9,'pekanbaru':.95,'padang':.95,'banda aceh':1,'semarang':1.05,'malang':1.1,'balikpapan':1.2,'manado':1.3,'pontianak':1.1,'lampung':1};
+function originFactor(o){var v=ORIGIN_X[o.trim().toLowerCase()];return v===undefined?1.15:v;}
+
+/* ---------- destination database ---------- */
+/* S(name, type f|s|v|n, lat, lng, rating, reviews(K), baseCostIDR, vibe b|m|c|n, transportOverride) */
+var S=function(n,t,lat,lng,r,rv,c,v,o){return {n:n,t:t,lat:lat,lng:lng,r:r,rv:rv,c:c,v:v||'',o:o||null};};
+var ID_E='Police 110 · Ambulance 118/119 · Search & Rescue 115 · General emergency 112';
+var DEST=[
+{id:'bali',name:'Bali',country:'Indonesia',flag:'🇮🇩',scope:'local',lat:-8.55,lng:115.2,zoom:10,code:'DPS',emoji:'🏝️',w:{b:3,m:3,c:1,n:2},fl:2800000,lod:[220000,700000,3500000],climate:'tropical',temp:'25–32°C',rain:[10,11,0,1,2],cur:'IDR (Rp) — cards in tourist areas, cash for warungs',adapter:null,
+ tr:{b:[["Trans Metro Dewata bus",5000,35],["Shared scooter rental (fuel incl.)",40000,25]],c:[["GrabBike",35000,25],["GrabCar",110000,35]],l:[["Private driver (Innova / Alphard)",250000,40]]},
+ tips:{e:ID_E,p:'Type C/F · 230V (same as home)',t:'Not mandatory — round up for drivers, 5–10% at upscale spots',s:'Money-changer sleight of hand (use authorized changers), scooter bag-snatching, add-on "free" tour upsells',c:'Cover shoulders & knees at temples (sarong + sash), never step on canang offerings, respect Nyepi silence day'},
+ sp:[
+ S("Clear Café Ubud","f",-8.5069,115.2638,4.5,6,95000),
+ S("Warung Babi Guling Ibu Oka","f",-8.5069,115.2630,4.2,35,60000),
+ S("Bebek Bengil (Dirty Duck Diner)","f",-8.5155,115.2573,4.4,14,190000),
+ S("Naughty Nuri's Warung","f",-8.4917,115.2468,4.4,9,150000),
+ S("Tegallalang Rice Terrace","s",-8.4312,115.2793,4.5,22,35000,"n"),
+ S("Sacred Monkey Forest Sanctuary","s",-8.5188,115.2587,4.5,60,100000,"c"),
+ S("Tirta Empul Temple","s",-8.4151,115.3153,4.6,30,50000,"m"),
+ S("Uluwatu Temple","s",-8.8291,115.0849,4.7,55,50000,"m"),
+ S("Kelingking Beach, Nusa Penida","s",-8.7500,115.4733,4.7,20,100000,"b",["Fast boat Sanur → Nusa Penida + scooter",350000,180]),
+ S("Padang Padang Beach","s",-8.8112,115.1001,4.7,9,20000,"b"),
+ S("Tanah Lot Temple Sunset","v",-8.6212,115.0868,4.6,70,60000,"m"),
+ S("Jimbaran Bay Seafood Sunset","v",-8.7907,115.1634,4.5,8,0,"b"),
+ S("Seminyak Beach Golden Hour","v",-8.6900,115.1580,4.5,15,0,"b"),
+ S("Potato Head Beach Club","n",-8.6830,115.1560,4.5,12,400000,"c"),
+ S("Kecak Fire Dance, Uluwatu","n",-8.8291,115.0849,4.7,10,150000,"m")]},
+{id:'yogya',name:'Yogyakarta',country:'Indonesia',flag:'🇮🇩',scope:'local',lat:-7.79,lng:110.4,zoom:11,code:'YIA',emoji:'🏛️',w:{b:1,m:3,c:2,n:2},fl:2400000,lod:[180000,550000,2800000],climate:'tropical',temp:'24–33°C',rain:[10,11,0,1,2,3],cur:'IDR (Rp) — cash is king at markets',adapter:null,
+ tr:{b:[["TransJogja bus",3600,30],["Becak / walking",20000,15]],c:[["GrabBike",18000,20],["GrabCar",55000,25]],l:[["Private car + driver",200000,30]]},
+ tips:{e:ID_E,p:'Type C/F · 230V (same as home)',t:'Not mandatory — small tips for guides & drivers appreciated',s:'Becak/andong drivers detouring to batik shops, "Keraton closed today" tricks, ticket touts near Borobudur',c:'Dress modestly at Keraton, Borobudur & Prambanan; Borobudur upper terrace needs advance ticket & special sandals'},
+ sp:[
+ S("Gudeg Yu Djum Wijilan","f",-7.8051,110.3665,4.4,9,35000),
+ S("Kopi Klotok","f",-7.6370,110.4170,4.6,22,60000),
+ S("Raminten Cabaret Restaurant","f",-7.7837,110.3683,4.5,12,70000),
+ S("Sate Klathak Pak Pong","f",-7.8610,110.3815,4.5,8,60000),
+ S("Borobudur Temple","s",-7.6079,110.2038,4.8,70,450000,"m"),
+ S("Prambanan Temple","s",-7.7520,110.4915,4.7,55,400000,"m"),
+ S("Keraton Yogyakarta (Sultan's Palace)","s",-7.8053,110.3642,4.5,25,25000,"m"),
+ S("Taman Sari Water Castle","s",-7.8100,110.3590,4.5,20,15000,"m"),
+ S("Malioboro Street Shopping","s",-7.7926,110.3658,4.5,80,0,"c"),
+ S("Jomblang Cave (Light of Heaven)","s",-7.9886,110.6586,4.7,6,500000,"n",["Private jeep to Gunungkidul",250000,90]),
+ S("Ratu Boko Sunset","v",-7.7701,110.4891,4.7,16,300000,"m"),
+ S("HeHa Sky View","v",-7.8490,110.4790,4.5,40,30000,"c"),
+ S("Parangtritis Beach Sunset","v",-8.0250,110.3290,4.4,40,10000,"b",["Bus + ojek to Parangtritis",60000,75]),
+ S("Malioboro Lesehan Night Food Crawl","n",-7.7920,110.3660,4.5,20,70000,"c"),
+ S("Ramayana Ballet at Prambanan","n",-7.7525,110.4920,4.6,10,300000,"m")]},
+{id:'labuan',name:'Labuan Bajo',country:'Indonesia',flag:'🇮🇩',scope:'local',lat:-8.55,lng:119.78,zoom:10,code:'LBJ',emoji:'🐉',w:{b:3,m:0,c:0,n:3},fl:3800000,lod:[250000,750000,3200000],climate:'tropical',temp:'26–34°C',rain:[11,0,1,2],cur:'IDR (Rp) — ATMs are limited, bring cash',adapter:null,
+ tr:{b:[["Ojek / walking",15000,10],["Shared pickup + local boat",80000,45]],c:[["Rental scooter",40000,15],["Shared speedboat",250000,60]],l:[["Private speedboat / charter car",1200000,60]]},
+ tips:{e:ID_E+' · Komodo NP rangers on site',p:'Type C/F · 230V (same as home)',t:'Not mandatory — 50–100k for boat crew & guides is kind',s:'Overpriced last-minute boat tours (book licensed operators), fake "ranger" guides, plastic-bag packing—carry your own cash',c:'Rangers are mandatory on Komodo/Rinca treks, keep 5m from dragons, take every bit of trash home'},
+ sp:[
+ S("Mediterraneo Resto & Pizza","f",-8.4955,119.8815,4.6,3,150000),
+ S("Kampung Ujung Fish Market Grill","f",-8.4935,119.8780,4.4,4,120000),
+ S("Paradise Bar & Resto","f",-8.4945,119.8790,4.4,3,120000),
+ S("Kopi Flores Coffee House","f",-8.4970,119.8870,4.6,1.5,60000),
+ S("Padar Island Sunrise Hike","s",-8.6540,119.5810,4.8,12,225000,"n",["Phinisi / speedboat Labuan Bajo → Padar",450000,150]),
+ S("Rinca Island Komodo Dragons","s",-8.6560,119.7220,4.7,8,350000,"n",["Speedboat to Rinca",300000,90]),
+ S("Pink Beach (Pantai Merah)","s",-8.6410,119.4620,4.7,6,50000,"b",["Speedboat to Pink Beach",400000,120]),
+ S("Kanawa Island Snorkeling","s",-8.5000,119.7500,4.6,4,100000,"b",["Speedboat to Kanawa",250000,60]),
+ S("Cunca Wulang Canyon","s",-8.5700,120.0000,4.5,2,100000,"n",["Pickup truck to Cunca Wulang",150000,70]),
+ S("Bukit Sylvia Sunset","v",-8.4890,119.8770,4.6,3,0,"n"),
+ S("Kalong Island Bat Flight","v",-8.4840,119.7170,4.7,2,250000,"n",["Boat to Kalong Island",250000,60]),
+ S("Waterfront Sunset Promenade","v",-8.4950,119.8810,4.5,4,0,"b"),
+ S("Kampung Ujung Night Market","n",-8.4935,119.8785,4.4,3,150000,"c"),
+ S("Bajo Waterfront Live Music Bar","n",-8.4948,119.8805,4.4,2,200000,"c")]},
+{id:'bandung',name:'Bandung',country:'Indonesia',flag:'🇮🇩',scope:'local',lat:-6.88,lng:107.62,zoom:11,code:'BDO',emoji:'🌸',w:{b:0,m:1,c:3,n:2},fl:1900000,lod:[180000,520000,2400000],climate:'tropical',cool:true,temp:'17–28°C',rain:[10,11,0,1,2,3],cur:'IDR (Rp) — QRIS widely accepted',adapter:null,
+ tr:{b:[["Angkot",6000,25],["Trans Metro Pasundan bus",5000,30]],c:[["GrabBike",20000,25],["GrabCar",65000,35]],l:[["Private car + driver",250000,40]]},
+ tips:{e:ID_E,p:'Type C/F · 230V (same as home)',t:'Not mandatory — round up for drivers',s:'Inflated "tourist price" taxis, parking touts around Lembang, fake factory-outlet promoters',c:'Sundanese hospitality is soft-spoken & polite; weekend traffic to Lembang is heavy, go early'},
+ sp:[
+ S("Batagor Kingsley","f",-6.9187,107.6070,4.3,10,45000),
+ S("Sumber Hidangan Bakery & Ice Cream","f",-6.9170,107.6070,4.4,9,60000),
+ S("Nasi Bancakan Bandung","f",-6.8960,107.6130,4.4,10,70000),
+ S("Kopi Toko Djawa","f",-6.9190,107.6075,4.5,4,70000),
+ S("Tangkuban Perahu Crater","s",-6.7596,107.6097,4.6,45,100000,"n"),
+ S("Kawah Putih (White Crater)","s",-7.1660,107.4020,4.6,42,150000,"n",["Angkot + ojek to Ciwidey",90000,120]),
+ S("Dusun Bambu Lembang","s",-6.8100,107.5500,4.4,40,30000,"n"),
+ S("Gedung Sate Heritage","s",-6.9025,107.6186,4.6,20,0,"m"),
+ S("Asia-Africa Conference Museum","s",-6.9210,107.6094,4.6,6,0,"m"),
+ S("Farmhouse Lembang Sunset","v",-6.8310,107.6070,4.4,50,30000,"c"),
+ S("Punclut Highland Sunset Dinner","v",-6.8470,107.6120,4.5,8,0,"n"),
+ S("Orchid Forest Cikole","v",-6.7930,107.6370,4.5,15,50000,"n"),
+ S("Jalan Braga Café Hopping","n",-6.9175,107.6097,4.5,12,150000,"c"),
+ S("Cihampelas Walk (Ciwalk) Night","n",-6.8990,107.6050,4.5,20,100000,"c")]},
+{id:'lombok',name:'Lombok',country:'Indonesia',flag:'🇮🇩',scope:'local',lat:-8.55,lng:116.2,zoom:9,code:'LOP',emoji:'🏖️',w:{b:3,m:1,c:0,n:3},fl:3400000,lod:[220000,650000,3000000],climate:'tropical',temp:'25–33°C',rain:[11,0,1,2],cur:'IDR (Rp) — cash on the Gilis & Kuta',adapter:null,
+ tr:{b:[["Cidomo / ojek",20000,15],["Scooter rental",70000,30]],c:[["Grab / Gojek",60000,30],["Private taxi (shared)",150000,40]],l:[["Private car + driver",350000,45]]},
+ tips:{e:ID_E,p:'Type C/F · 230V (same as home)',t:'Not mandatory — 5–10% in upscale venues',s:'Gili boat ticket touts, "shared" tours with endless shopping stops, scooter damage claims (photo your rental first)',c:'Sasak culture: modest dress away from beaches, Friday prayer times, follow Rinjani national park rules'},
+ sp:[
+ S("Ayam Taliwang Irama","f",-8.5800,116.1090,4.4,6,70000),
+ S("Sate Rembiga Ibu Sinar","f",-8.5700,116.1300,4.4,3,60000),
+ S("Nasi Balap Puyung Inaq Esun","f",-8.6350,116.2800,4.4,3,35000),
+ S("Hippie Beach Café, Kuta","f",-8.8970,116.2780,4.5,2,90000),
+ S("Gili Trawangan Island","s",-8.3500,116.0390,4.6,25,0,"b",["Public boat Bangsal → Gili T",100000,45]),
+ S("Pink Beach (Tangsi)","s",-8.8500,116.5400,4.7,6,25000,"b",["Private car to Jerowaru",350000,120]),
+ S("Tiu Kelep & Sendang Gile Waterfalls","s",-8.3180,116.4000,4.6,9,40000,"n",["Ojek + guide to Senaru",200000,90]),
+ S("Selong Belanak Beach","s",-8.8750,116.1800,4.7,5,0,"b"),
+ S("Tanjung Aan Beach","s",-8.9000,116.3000,4.7,12,0,"b"),
+ S("Bukit Merese Hill","v",-8.9100,116.3900,4.7,6,0,"n"),
+ S("Senggigi Beach Sunset","v",-8.4900,116.0410,4.4,10,0,"b"),
+ S("Gili T Sunset Swing","v",-8.3507,116.0300,4.7,4,0,"b",["Public boat Bangsal → Gili T",100000,45]),
+ S("Senggigi Night Market","n",-8.4880,116.0400,4.2,3,100000,"c"),
+ S("Gili Trawangan Night Market","n",-8.3507,116.0390,4.5,6,120000,"c",["Public boat Bangsal → Gili T",100000,45])]},
+{id:'jakarta',name:'Jakarta',country:'Indonesia',flag:'🇮🇩',scope:'local',lat:-6.2,lng:106.82,zoom:11,code:'CGK',emoji:'🏙️',w:{b:1,m:2,c:3,n:0},fl:1700000,lod:[250000,700000,2800000],climate:'tropical',temp:'26–34°C',rain:[10,11,0,1,2],cur:'IDR (Rp) — QRIS & e-wallets everywhere',adapter:null,
+ tr:{b:[["TransJakarta bus",3500,30],["KRL Commuter Line",5000,35]],c:[["MRT Jakarta",14000,25],["GrabCar",75000,35]],l:[["Blue Bird Silverbird taxi",180000,35]]},
+ tips:{e:ID_E,p:'Type C/F · 230V (same as home)',t:'Not mandatory — round up taxis, 5–10% at upscale restaurants',s:'Unmetered taxis, pickpockets on KRL/TransJakarta/Tanah Abang, fake officers around Kota Tua',c:'Muslim-majority city: dress modestly at Istiqlal, avoid peak traffic — use MRT/KRL'},
+ sp:[
+ S("Kopi Tiam Oey Sabang","f",-6.1860,106.8240,4.4,5,70000),
+ S("Sate Khas Senayan","f",-6.2290,106.7980,4.4,6,110000),
+ S("Gado-Gado Bonbin","f",-6.1890,106.8300,4.4,5,50000),
+ S("Nasi Goreng Kambing Kebon Sirih","f",-6.1870,106.8290,4.4,10,55000),
+ S("National Monument (Monas)","s",-6.1754,106.8272,4.6,90,25000,"m"),
+ S("Kota Tua Jakarta Old Town","s",-6.1352,106.8133,4.4,60,10000,"m"),
+ S("Istiqlal Mosque & Jakarta Cathedral","s",-6.1700,106.8315,4.7,50,0,"m"),
+ S("Museum MACAN","s",-6.1937,106.7706,4.5,3,150000,"c"),
+ S("Grand Indonesia & Plaza Indonesia","s",-6.1950,106.8210,4.6,40,0,"c"),
+ S("Ancol Dreamland Beach","s",-6.1260,106.8300,4.4,50,300000,"b"),
+ S("SKYE Bar & Restaurant Sunset","v",-6.1950,106.8212,4.4,5,0,"c"),
+ S("Sunda Kelapa Harbour Sunset","v",-6.1250,106.8120,4.4,10,5000,"m"),
+ S("PIK Mangrove Boardwalk Sunset","v",-6.1100,106.7400,4.4,8,35000,"n"),
+ S("Kemang Nightlife & Live Music","n",-6.2610,106.8130,4.3,10,200000,"c"),
+ S("Blok M Night Market & Little Tokyo","n",-6.2440,106.7990,4.4,15,100000,"c")]},
+{id:'tokyo',name:'Tokyo',country:'Japan',flag:'🇯🇵',scope:'intl',lat:35.69,lng:139.74,zoom:11,code:'HND',emoji:'🗼',w:{b:0,m:3,c:3,n:1},fl:7500000,lod:[380000,1100000,4500000],climate:'temperate',rain:[5,8],cur:'JPY (¥) ≈ Rp 105 per ¥1 — carry cash, many small shops are cash-only',adapter:'Type A',
+ tr:{b:[["Tokyo Metro Ginza Line",22000,18],["JR Yamanote Line",22000,20]],c:[["Metro + JR combo",30000,22],["Taxi (short hop)",120000,15]],l:[["Hire taxi / private car",450000,25]]},
+ tips:{e:'Police 110 · Fire/Ambulance 119 · Japan Visitor Hotline +81-50-3816-2787 (24h)',p:'Type A/B · 100V — bring a Type A adapter; most phone/laptop chargers are dual-voltage',t:'No tipping — it can feel awkward or rude',s:'Kabukicho/Roppongi touts, bars with hidden cover charges, drink-spiking at fake "host" bars, overpriced airport taxis',c:'Keep quiet on trains, avoid eating while walking, carry a small bag for trash, remove shoes where indicated'},
+ sp:[
+ S("Ichiran Ramen Shibuya","f",35.6595,139.7005,4.3,25,115000),
+ S("Tsukiji Outer Market Sushi Breakfast","f",35.6655,139.7707,4.4,60,250000),
+ S("Afuri Ramen Harajuku","f",35.6683,139.7035,4.2,8,130000),
+ S("Genki Sushi Shibuya","f",35.6600,139.6990,4.1,10,150000),
+ S("Senso-ji Temple, Asakusa","s",35.7148,139.7967,4.7,150,0,"m"),
+ S("Meiji Jingu Shrine","s",35.6764,139.6993,4.6,60,0,"m"),
+ S("TeamLab Planets Toyosu","s",35.6492,139.7896,4.6,45,400000,"c"),
+ S("Akihabara Electric Town","s",35.6984,139.7731,4.4,60,0,"c"),
+ S("Shinjuku Gyoen National Garden","s",35.6852,139.7100,4.6,40,52000,"n"),
+ S("Mt. Fuji & Lake Kawaguchiko Day Trip","s",35.5017,138.7716,4.7,20,0,"n",["Highway bus Shinjuku → Kawaguchiko",336000,150]),
+ S("Shibuya Sky","v",35.6585,139.7022,4.6,25,230000,"c"),
+ S("Tokyo Skytree & Solamachi","v",35.7101,139.8107,4.5,80,220000,"c"),
+ S("Odaiba Seaside Sunset","v",35.6270,139.7740,4.5,30,0,"c"),
+ S("Omoide Yokocho (Memory Lane), Shinjuku","n",35.6933,139.6997,4.4,30,315000,"m"),
+ S("Golden Gai Bar Crawl","n",35.6940,139.7040,4.3,10,350000,"c")]},
+{id:'seoul',name:'Seoul',country:'South Korea',flag:'🇰🇷',scope:'intl',lat:37.56,lng:126.99,zoom:11,code:'ICN',emoji:'🌸',w:{b:0,m:2,c:3,n:1},fl:7000000,lod:[330000,950000,3800000],climate:'temperate',rain:[6,7],cur:'KRW (₩) ≈ Rp 11.5 per ₩1 — cards accepted nearly everywhere',adapter:null,
+ tr:{b:[["Seoul Subway Line 2",14000,20],["City bus (T-money)",14000,25]],c:[["Subway + Kakao T",35000,22],["Kakao T Taxi",90000,18]],l:[["Premium taxi / chauffeur",400000,25]]},
+ tips:{e:'Police 112 · Fire/Ambulance 119 · Korea Travel Hotline 1330 (English)',p:'Type C/F · 220V (same as home)',t:'Tipping is not expected',s:'Late-night taxi overcharging (use Kakao T), aggressive Myeongdong promos, fake "tourist discount" tickets',c:'Use two hands to give/receive, remove shoes in hanok & homes, elders are served first'},
+ sp:[
+ S("Gwangjang Market Street Food","f",37.5700,126.9996,4.4,60,130000),
+ S("Myeongdong Kyoja Kalguksu","f",37.5635,126.9856,4.4,17,115000),
+ S("Tosokchon Samgyetang","f",37.5788,126.9710,4.2,20,230000),
+ S("Hongdae Samgyeopsal BBQ Street","f",37.5563,126.9220,4.4,8,330000),
+ S("Gyeongbokgung Palace","s",37.5796,126.9770,4.7,100,35000,"m"),
+ S("Bukchon Hanok Village","s",37.5826,126.9835,4.4,50,0,"m"),
+ S("Changdeokgung Secret Garden","s",37.5794,126.9910,4.7,35,115000,"m"),
+ S("Dongdaemun Design Plaza","s",37.5665,127.0092,4.4,40,0,"c"),
+ S("Bukhansan National Park Hike","s",37.6595,126.9770,4.6,5,0,"n",["Subway + bus to Bukhansan",30000,60]),
+ S("Nami Island Day Trip","s",37.7910,127.5250,4.4,25,220000,"n",["ITX train + shuttle to Nami Island",120000,90]),
+ S("N Seoul Tower, Namsan","v",37.5512,126.9882,4.5,90,185000,"c"),
+ S("Banpo Bridge Rainbow Fountain","v",37.5110,126.9960,4.6,10,0,"c"),
+ S("Naksan Park Sunset (City Wall)","v",37.5805,127.0070,4.6,9,0,"m"),
+ S("Hongdae Street Night & Karaoke","n",37.5563,126.9236,4.4,15,250000,"c"),
+ S("Myeongdong Night Street Food","n",37.5636,126.9822,4.2,50,200000,"c")]},
+{id:'singapore',name:'Singapore',country:'Singapore',flag:'🇸🇬',scope:'intl',lat:1.32,lng:103.84,zoom:11,code:'SIN',emoji:'🦁',w:{b:1,m:1,c:3,n:2},fl:1600000,lod:[500000,1300000,5000000],climate:'tropical',temp:'26–32°C',rain:[10,11,0],cur:'SGD (S$) ≈ Rp 12.300 per S$1 — cards & PayNow everywhere',adapter:'Type G',
+ tr:{b:[["MRT (North-South Line)",20000,20],["SBS city bus",15000,25]],c:[["MRT + Grab",50000,20],["Grab car",150000,15]],l:[["Private hire limousine",500000,20]]},
+ tips:{e:'Police 999 · Ambulance/Fire 995 · Police non-emergency 1800-255-0000',p:'Type G · 230V — bring a UK-style 3-pin adapter',t:'No tipping — service charge & GST are already added',s:'Concert-ticket phishing, "free gift" promoters, strict fines: littering, vaping, durian on MRT, jaywalking near crossings',c:'Multicultural: remove shoes at temples & mosques, queue politely, return trays at hawker centres'},
+ sp:[
+ S("Maxwell Food Centre (Tian Tian Chicken Rice)","f",1.2804,103.8447,4.2,20,75000),
+ S("Lau Pa Sat Satay Street","f",1.2806,103.8504,4.2,25,160000),
+ S("Ya Kun Kaya Toast","f",1.2835,103.8519,4.3,6,65000),
+ S("Jumbo Seafood Chilli Crab, Riverside","f",1.2880,103.8460,4.4,20,700000),
+ S("Gardens by the Bay (Flower Dome & Cloud Forest)","s",1.2816,103.8636,4.7,150,400000,"n"),
+ S("Sentosa & Universal Studios","s",1.2540,103.8238,4.5,70,1100000,"b"),
+ S("Chinatown & Buddha Tooth Relic Temple","s",1.2814,103.8441,4.5,30,0,"m"),
+ S("Singapore Zoo & River Wonders","s",1.4043,103.7930,4.7,40,600000,"n"),
+ S("Little India & Haji Lane","s",1.3008,103.8590,4.5,20,0,"m"),
+ S("Jewel Changi Rain Vortex","s",1.3601,103.9895,4.7,100,0,"c"),
+ S("Marina Bay Sands SkyPark","v",1.2834,103.8607,4.6,70,430000,"c"),
+ S("Merlion Park & Marina Bay Waterfront","v",1.2868,103.8545,4.6,100,0,"c"),
+ S("Clarke Quay Riverside Dinner","v",1.2906,103.8465,4.3,25,0,"c"),
+ S("Garden Rhapsody Light Show (Supertree Grove)","n",1.2816,103.8636,4.8,50,0,"n"),
+ S("Orchard Road Night Shopping Stroll","n",1.3048,103.8318,4.5,60,500000,"c")]},
+{id:'bangkok',name:'Bangkok',country:'Thailand',flag:'🇹🇭',scope:'intl',lat:13.75,lng:100.52,zoom:11,code:'BKK',emoji:'🛕',w:{b:0,m:3,c:2,n:1},fl:2600000,lod:[200000,650000,3200000],climate:'tropical',temp:'26–35°C',rain:[4,5,6,7,8,9],cur:'THB (฿) ≈ Rp 470 per ฿1 — cash for street food & markets',adapter:null,
+ tr:{b:[["BTS Skytrain Sukhumvit Line",25000,18],["Chao Phraya Express Boat",15000,25]],c:[["MRT + Grab",45000,22],["Bolt / Grab Car",85000,25]],l:[["Private car + driver",350000,25]]},
+ tips:{e:'Tourist Police 1155 · Police 191 · Ambulance 1669',p:'Types A/B/C/F/O · 220V — Indonesian plugs usually fit',t:'Small tips (20–50 THB) appreciated; round up taxis',s:'"Grand Palace is closed today" tuk-tuk detours, gem-shop scams, taxis refusing the meter',c:'Cover shoulders & knees at temples, never touch heads, remove shoes inside temples, respect the Royal family'},
+ sp:[
+ S("Thip Samai Pad Thai","f",13.7525,100.5043,4.3,25,100000),
+ S("Jay Fai Street Food","f",13.7536,100.5047,4.3,5,450000),
+ S("Or Tor Kor Market","f",13.7967,100.5476,4.4,30,200000),
+ S("Wang Lang Market & Boat Noodles","f",13.7580,100.4880,4.2,10,65000),
+ S("Grand Palace & Wat Phra Kaew","s",13.7500,100.4913,4.5,150,235000,"m"),
+ S("Wat Pho (Reclining Buddha)","s",13.7465,100.4927,4.7,100,140000,"m"),
+ S("Wat Arun (Temple of Dawn)","s",13.7437,100.4888,4.7,80,47000,"m"),
+ S("Chatuchak Weekend Market","s",13.7999,100.5503,4.4,80,200000,"c"),
+ S("Jim Thompson House","s",13.7491,100.5285,4.5,15,94000,"m"),
+ S("Lumphini Park","s",13.7314,100.5414,4.6,20,0,"n"),
+ S("Ayutthaya Ancient City Day Trip","s",14.3532,100.5686,4.7,20,150000,"m",["Train Hua Lamphong → Ayutthaya",9000,90]),
+ S("ICONSIAM Riverside","v",13.7265,100.5100,4.6,90,0,"c"),
+ S("Chao Phraya Dinner Cruise","v",13.7258,100.5128,4.4,12,350000,"m"),
+ S("Sirocco Sky Bar at Lebua","v",13.7218,100.5167,4.5,10,500000,"c"),
+ S("Khao San Road Night","n",13.7589,100.4974,4.1,50,300000,"c"),
+ S("Asiatique The Riverfront Night Market","n",13.7040,100.5030,4.4,60,400000,"c")]},
+{id:'kl',name:'Kuala Lumpur',country:'Malaysia',flag:'🇲🇾',scope:'intl',lat:3.14,lng:101.69,zoom:12,code:'KUL',emoji:'🏙️',w:{b:0,m:2,c:3,n:1},fl:1100000,lod:[190000,520000,2600000],climate:'tropical',temp:'25–33°C',rain:[3,9,10],cur:'MYR (RM) ≈ Rp 3.700 per RM1 — cards & e-wallets common',adapter:'Type G',
+ tr:{b:[["RapidKL LRT Kelana Jaya Line",12000,20],["GoKL free city bus",0,25]],c:[["LRT + Grab",35000,25],["Grab car",60000,20]],l:[["Private chauffeur",300000,25]]},
+ tips:{e:'Police/Ambulance 999 · Fire 994 · Tourism Malaysia hotline 1-300-88-5050',p:'Type G · 230V — bring a 3-pin adapter',t:'10% service charge often added; tipping optional',s:'Snatch theft (keep bags away from the road), unmetered taxis (use Grab), fake "police" checks, ATM card skimmers',c:'Multi-ethnic & Muslim-majority: modest dress at mosques & Batu Caves, use right hand, halal food is everywhere'},
+ sp:[
+ S("Village Park Restaurant (Nasi Lemak)","f",3.1480,101.6210,4.4,12,85000),
+ S("Restoran Yut Kee (Heritage Kopitiam)","f",3.1560,101.6970,4.3,8,90000),
+ S("Madras Lane Hawker, Petaling Street","f",3.1450,101.6985,4.3,15,60000),
+ S("Jalan Alor Food Street","f",3.1458,101.7090,4.2,40,170000),
+ S("Petronas Twin Towers & KLCC Park","s",3.1579,101.7116,4.7,200,360000,"c"),
+ S("Batu Caves","s",3.2379,101.6840,4.5,100,0,"m"),
+ S("Merdeka Square & Sultan Abdul Samad","s",3.1488,101.6944,4.5,20,0,"m"),
+ S("Central Market Kuala Lumpur","s",3.1451,101.6955,4.2,40,0,"c"),
+ S("Perdana Botanical Gardens & Bird Park","s",3.1422,101.6862,4.5,15,200000,"n"),
+ S("Forest Eco Park Canopy Walk","s",3.1500,101.7040,4.5,6,100000,"n"),
+ S("KL Tower Sky Deck","v",3.1528,101.7035,4.5,40,380000,"c"),
+ S("Thean Hou Temple Sunset","v",3.1198,101.6870,4.6,15,0,"m"),
+ S("Skybar Traders Hotel (Petronas View)","v",3.1546,101.7124,4.5,6,0,"c"),
+ S("Bukit Bintang Night Stroll & Pavilion","n",3.1490,101.7130,4.6,50,300000,"c"),
+ S("Symphony Lake Fountain Show, KLCC","n",3.1553,101.7114,4.7,15,0,"c")]},
+{id:'phuket',name:'Phuket',country:'Thailand',flag:'🇹🇭',scope:'intl',lat:7.9,lng:98.35,zoom:10,code:'HKT',emoji:'🌴',w:{b:3,m:1,c:1,n:1},fl:3100000,lod:[250000,700000,3500000],climate:'tropical',temp:'26–33°C',rain:[4,5,6,7,8,9],cur:'THB (฿) ≈ Rp 470 per ฿1 — cash for beach vendors & songthaews',adapter:null,
+ tr:{b:[["Songthaew (shared pickup)",35000,35],["Scooter rental",75000,25]],c:[["Grab / Bolt taxi",200000,30],["Tuk-tuk (negotiated)",300000,25]],l:[["Private van / car + driver",1000000,30]]},
+ tips:{e:'Tourist Police 1155 · Police 191 · Ambulance 1669',p:'Types A/B/C/F/O · 220V — Indonesian plugs usually fit',t:'20–50 THB for service; 10% at upscale resorts',s:'Jet-ski damage scams, taxi/tuk-tuk overcharging (agree price first), Patong show-ticket touts, drink spiking; swim only between flags (red-flag monsoon season)',c:'Respect monks (do not touch or sit beside), cover up at Wat Chalong & Big Buddha, never disrespect the Royal family'},
+ sp:[
+ S("One Chun Café & Restaurant","f",7.8840,98.3880,4.3,10,188000),
+ S("Raya Restaurant (Southern Thai)","f",7.8845,98.3875,4.4,6,300000),
+ S("Lock Tien Old Town Food Walk","f",7.8848,98.3868,4.2,5,100000),
+ S("Kopitiam by Wilai","f",7.8878,98.3898,4.3,3,100000),
+ S("Phi Phi Islands Speedboat Tour","s",7.7407,98.7784,4.5,40,0,"b",["Speedboat Rassada Pier → Phi Phi",950000,90]),
+ S("Big Buddha Phuket","s",7.8277,98.3125,4.7,50,0,"m"),
+ S("Wat Chalong","s",7.8467,98.3377,4.5,25,0,"m"),
+ S("Kata & Karon Beach","s",7.8200,98.2980,4.5,15,0,"b"),
+ S("James Bond Island, Phang Nga Bay","s",8.2740,98.5011,4.5,30,800000,"n",["Van + longtail boat to Phang Nga Bay",600000,120]),
+ S("Old Phuket Town Sino-Portuguese Walk","s",7.8840,98.3880,4.5,20,0,"m"),
+ S("Promthep Cape Sunset","v",7.7626,98.3059,4.6,25,0,"b"),
+ S("Karon Viewpoint","v",7.8040,98.3010,4.6,10,0,"b"),
+ S("Nai Harn Beach Sunset","v",7.7769,98.3040,4.7,10,0,"b"),
+ S("Bangla Road Patong Nightlife","n",7.8928,98.2966,4.2,30,400000,"c"),
+ S("Phuket Sunday Walking Street (Lard Yai)","n",7.8830,98.3865,4.5,10,150000,"m")]}
+];
+DEST.forEach(function(d){
+  var fs=d.sp.filter(function(s){return s.t==='f';});
+  d.avgF=rnd(fs.reduce(function(a,s){return a+s.c;},0)/fs.length);
+});
+var FILL={
+  f:['Neighborhood café & street-food crawl in {d}','Hidden-gem local eatery in {d}','Brunch at a trending {d} café'],
+  s:['Free-roam: local market & backstreets of {d}','Souvenir & craft shopping in {d}','Slow wander through a local {d} neighborhood'],
+  v:['Golden-hour stroll & dinner at a {d} local favorite','Sunset spot hunting around {d}'],
+  n:['Night market or rooftop chill in {d}','Live-music & dessert hop in {d}']
+};
+var SLOTS=[['07:30','f','Breakfast'],['09:30','s','Morning Explore'],['12:30','f','Lunch'],['15:00','s','Afternoon Highlight'],['18:30','v','Golden Hour & Dinner'],['21:00','n','Night Vibes'],['22:00','h','Back to Hotel']];
+var TAGNAME={f:'🍜',s:'🏛️',v:'🌅',n:'🌙',h:'🛏️'};
+
+/* ---------- planning engine ---------- */
+function ovrTr(o,ti){
+  if(ti===2) return {mode:'Private charter · '+o[0],cost:rnd(o[1]*2.2),mins:o[2]};
+  if(ti===0) return {mode:o[0],cost:rnd(o[1]*.85),mins:o[2]};
+  return {mode:o[0],cost:o[1],mins:o[2]};
+}
+function computePlan(d,inp,ti){
+  var T=TIERS[ti],days=inp.days,nights=Math.max(days-1,0),sel=inp.vibes;
+  var pools={f:[],s:[],v:[],n:[]};
+  d.sp.forEach(function(s){pools[s.t].push(s);});
+  if(sel.length){
+    Object.keys(pools).forEach(function(k){
+      pools[k]=pools[k].map(function(s,i){return {s:s,i:i,p:sel.indexOf(s.v)>=0?0:1};})
+        .sort(function(a,b){return a.p-b.p||a.i-b.i;}).map(function(o){return o.s;});
+    });
+  }
+  var ptr={f:0,s:0,v:0,n:0};
+  function pick(t){
+    var arr=pools[t],i=ptr[t]++;
+    if(i<arr.length) return arr[i];
+    var k=i-arr.length,names=FILL[t],j=(((k*7)%11)-5)/500;
+    return {n:names[k%names.length].replace('{d}',d.name),t:t,lat:d.lat+j,lng:d.lng-j,r:+(4.4-(k%3)*.1).toFixed(1),rv:3+k%5,
+      c:t==='f'?d.avgF:(t==='n'?rnd(d.avgF*.8):0),v:'',o:null,fill:true};
+  }
+  var out=[];
+  for(var di=0;di<days;di++){
+    var slots=[];
+    for(var si=0;si<SLOTS.length;si++){
+      var time=SLOTS[si][0],t=SLOTS[si][1],label=SLOTS[si][2],sp,tr,meal=0,tix=0;
+      if(t==='h') sp={n:'Return to '+T.hotel.replace('{d}',d.name),t:'h',lat:d.lat,lng:d.lng,r:T.hr,rv:T.hrv,c:0,o:null,hotel:true};
+      else sp=pick(t);
+      if(sp.o) tr=ovrTr(sp.o,ti);
+      else{var opts=d.tr[T.k],o=opts[(di*3+si)%opts.length];tr={mode:o[0],cost:o[1],mins:o[2]+((si*5+di*3)%4)*3};}
+      if(t==='f') meal=rnd(sp.c*T.mealX);
+      else if(t==='s') tix=rnd(sp.c*T.tixX);
+      else if(t==='v'){tix=rnd(sp.c*T.tixX);meal=rnd(d.avgF*1.3*T.dinnerX);}
+      else if(t==='n') tix=rnd(sp.c*T.nightX);
+      slots.push({time:time,t:t,label:label,sp:sp,name:sp.n,r:sp.r,rv:sp.rv,lat:sp.lat,lng:sp.lng,meal:meal,tix:tix,tr:tr});
+    }
+    var total=slots.reduce(function(a,s){return a+s.meal+s.tix+s.tr.cost;},0);
+    var note='';
+    if(di===0&&days>1) note='🛬 Arrival day — assume an early flight landing ~07:00. Drop your bags at the hotel first, then enjoy!';
+    else if(di===days-1&&days>1) note='🛫 Departure day — keep the 21:00 slot flexible and head to the airport '+(d.scope==='intl'?'3 hours':'2 hours')+' before your flight.';
+    else if(days===1) note='🌞 One-day trip — packed schedule, wear comfy shoes!';
+    out.push({n:di+1,date:addDays(inp.date,di),slots:slots,total:total,note:note});
+  }
+  var meals=0,tixs=0,trs=0;
+  out.forEach(function(dd){dd.slots.forEach(function(s){meals+=s.meal;tixs+=s.tix;trs+=s.tr.cost;});});
+  var flights=rnd(d.fl*originFactor(inp.origin)*T.flightX);
+  var lodging=nights*d.lod[ti];
+  var food=rnd(meals*1.1);
+  var local=tixs+trs;
+  var sub=flights+lodging+food+local;
+  var buffer=rnd(sub*.05);
+  return {days:out,sums:{flights:flights,lodging:lodging,food:food,local:local,tix:tixs,tr:trs,buffer:buffer,total:sub+buffer,nights:nights}};
+}
+function rankDestinations(inp,ti){
+  var sel=inp.vibes;
+  var rows=DEST.filter(function(d){return d.scope===inp.scope&&d.name.toLowerCase()!==inp.origin.trim().toLowerCase();}).map(function(d){
+    var plan=computePlan(d,inp,ti);
+    var sc=sel.length?sel.reduce(function(a,k){return a+(d.w[k]||0);},0):(d.w.b+d.w.m+d.w.c+d.w.n)/2;
+    var mx=sel.length?sel.length*3:5;
+    return {d:d,plan:plan,score:sc,match:Math.min(99,Math.round(sc/mx*100)),total:plan.sums.total,fits:inp.budget?plan.sums.total<=inp.budget:null};
+  });
+  if(inp.budget){
+    var fit=rows.filter(function(r){return r.fits;}).sort(function(a,b){return b.score-a.score||a.total-b.total;});
+    var no=rows.filter(function(r){return !r.fits;}).sort(function(a,b){return a.total-b.total;});
+    return fit.concat(no);
+  }
+  return rows.sort(function(a,b){return b.score-a.score||a.total-b.total;});
+}
+function seasonInfo(d,dateStr){
+  var m=toDate(dateStr).getMonth();
+  if(d.climate==='temperate'){
+    if(m===11||m<=1) return {k:'winter',temp:'0–10°C',txt:'Winter — cold & dry, bundle up'};
+    if(m<=4) return {k:'spring',temp:'10–22°C',txt:'Spring — mild, pack layers'};
+    if(m<=7) return {k:'summer',temp:'25–35°C',txt:'Summer — hot & humid'+(d.rain.indexOf(m)>=0?', rainy spells likely':'')};
+    if(m===8) return {k:'warm',temp:'22–30°C',txt:'Early autumn — warm, typhoon/rain possible'};
+    if(m===9) return {k:'autumn',temp:'14–23°C',txt:'Autumn — crisp & pleasant'};
+    return {k:'cold',temp:'6–16°C',txt:'Late autumn — chilly, evenings are cold'};
+  }
+  var wet=d.rain.indexOf(m)>=0;
+  return {k:'tropical',temp:d.temp,wet:wet,txt:'Tropical '+d.temp+(wet?' — rainy season, expect daily showers':' — mostly dry & sunny')};
+}
+function buildPacking(d,inp,ti,ss){
+  var days=inp.days,intl=d.scope==='intl',v=inp.vibes,n=Math.min(days,7),g=[];
+  g.push({t:'📄 Documents & Money',i:[
+    intl?'Passport (valid 6+ months) & visa / e-visa / entry-form check':'KTP / ID card & e-ticket (screenshot offline)',
+    'Flight e-ticket + hotel booking (offline copy)',
+    intl?'Local currency cash + 2 payment cards':'Cash for warungs & small shops + e-wallet / QRIS',
+    intl?'Travel insurance policy (medical + baggage)':'Travel insurance or BPJS card',
+    'Copy of this itinerary (PDF)'
+  ]});
+  var cl=[n+' tops / tees',n+' sets of underwear & socks',Math.max(2,Math.ceil(n/2))+' bottoms (pants / skirts / shorts)','Comfortable walking shoes','Sleepwear'];
+  if(ss.k==='winter') cl=cl.concat(['Heavy winter coat','Thermal innerwear (top & bottom)','Gloves, scarf & beanie','Warm waterproof boots']);
+  else if(ss.k==='cold') cl=cl.concat(['Warm jacket / light coat','Sweater or fleece','Scarf & beanie for evenings']);
+  else if(ss.k==='autumn'||ss.k==='spring') cl=cl.concat(['Light jacket or cardigan','Layering shirts']);
+  else cl=cl.concat(['Light breathable clothes','Sun hat & sunglasses','Sunscreen SPF 50+']);
+  if(ss.k==='summer'||ss.k==='warm'||(ss.k==='tropical'&&ss.wet)||d.rain.indexOf(toDate(inp.date).getMonth())>=0) cl.push('Compact umbrella / light rain jacket');
+  if(d.cool) cl.push('Light jacket for chilly Lembang evenings');
+  g.push({t:'👕 Clothes & Weather ('+ss.temp+')',i:cl});
+  var vi=[];
+  if(v.indexOf('b')>=0) vi=vi.concat(['Swimsuit / swim shorts','Beach towel or sarong','Reef-safe sunscreen','Flip-flops / water shoes','Waterproof phone pouch']);
+  if(v.indexOf('m')>=0) vi=vi.concat(['Modest outfit (shoulders & knees covered)','Sarong / scarf for temples','Slip-on shoes (easy to remove)']);
+  if(v.indexOf('c')>=0) vi=vi.concat(['Comfy sneakers for long walks','Foldable tote bag for shopping','Offline maps & transit card app']);
+  if(v.indexOf('n')>=0) vi=vi.concat(['Hiking shoes / trail sandals','Rain jacket / poncho','Insect repellent','Reusable water bottle','Small daypack (15–20L)']);
+  if(!vi.length) vi=['Day backpack','Reusable water bottle','Foldable tote bag'];
+  g.push({t:'🎀 Vibe Gear',i:vi});
+  var te=['Phone + charger + power bank','Earphones / headphones'];
+  if(d.adapter) te.push('Universal travel adapter ('+d.adapter+')');
+  if(intl) te.push('eSIM or roaming pack for data');
+  te.push('Camera / spare memory card');
+  g.push({t:'🔌 Tech',i:te});
+  var he=['Personal medications & prescriptions','Hand sanitizer & masks','Basic first aid (plasters, pain relief, anti-diarrhea)'];
+  if(v.indexOf('b')>=0||v.indexOf('n')>=0||['labuan','lombok','phuket','bali'].indexOf(d.id)>=0) he.push('Motion-sickness pills (boats & winding roads)');
+  g.push({t:'💊 Health',i:he});
+  var ex=[];
+  if(days>7) ex.push('Laundry bag & travel detergent'); else if(days<=3) ex.push('Carry-on only — pack light!');
+  if(ti===0) ex=ex.concat(['Padlock for hostel lockers','Quick-dry towel','Earplugs & sleep mask']);
+  if(ti===1) ex=ex.concat(['Phone tripod / gimbal for aesthetic shots','Small journal & pen']);
+  if(ti===2) ex=ex.concat(['Smart-casual outfit for fine dining','Spare dressy shoes','Luggage tag & TSA lock']);
+  g.push({t:'✨ Extras for '+TIERS[ti].name,i:ex});
+  return g;
+}
+
+/* ---------- state ---------- */
+var state={inp:null,rows:null,cur:null,plan:null,tierPlans:null,manual:null,activeDay:0,checked:{},map:null,packing:null,season:null,lastName:null};
+
+function readForm(){
+  var bud=parseInt($('#budget').value,10);
+  var days=parseInt($('#days').value,10);if(!days||days<1)days=4;days=Math.min(days,14);$('#days').value=days;
+  var date=$('#date').value;if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){date=defaultDate();$('#date').value=date;}
+  var origin=$('#origin').value.trim();if(!origin){origin='Medan';$('#origin').value=origin;}
+  return {origin:origin,scope:$('input[name=scope]:checked').value,vibes:$$('.chip.on').map(function(c){return c.dataset.v;}),budget:bud>0?bud:null,date:date,days:days,tier:+$('input[name=tier]:checked').value};
+}
+function setForm(i){
+  $('#origin').value=i.origin;
+  $$('input[name=scope]').forEach(function(r){r.checked=r.value===i.scope;});
+  $$('.chip').forEach(function(c){var on=i.vibes.indexOf(c.dataset.v)>=0;c.classList.toggle('on',on);c.setAttribute('aria-pressed',on);});
+  $('#budget').value=i.budget||'';
+  $('#date').value=i.date;$('#days').value=i.days;
+  $$('input[name=tier]').forEach(function(r){r.checked=(+r.value)===i.tier;});
+}
+function saveDraft(){store('flynext_draft_v1',{inp:state.inp,manual:state.manual,checked:state.checked});}
+
+function generate(keepManual){
+  var inp=readForm();state.inp=inp;
+  if(!keepManual) state.manual=null;
+  var ti=inp.tier;
+  var rows=rankDestinations(inp,ti);state.rows=rows;
+  var cur=state.manual?rows.filter(function(r){return r.d.id===state.manual;})[0]:null;
+  if(!cur) {cur=rows[0];state.manual=null;}
+  state.cur=cur;state.plan=cur.plan;
+  state.tierPlans=TIERS.map(function(_,i){return computePlan(cur.d,inp,i);});
+  state.season=seasonInfo(cur.d,inp.date);
+  state.packing=buildPacking(cur.d,inp,ti,state.season);
+  state.activeDay=0;
+  render();
+  saveDraft();
+}
+
+/* ---------- rendering ---------- */
+function googleFlightsUrl(){
+  var i=state.inp,d=state.cur.d,back=addDays(i.date,i.days-1);
+  var q='Flights from '+i.origin+' to '+d.name+' on '+i.date+(i.days>1?' through '+back:'');
+  return 'https://www.google.com/travel/flights?q='+encodeURIComponent(q);
+}
+function bannerHTML(){
+  var i=state.inp,t=state.plan.sums.total;
+  if(!i.budget) return '<div class="banner explore">🧭 <b>Explorer Mode</b> — no budget set, so we compare all three tiers for you. Tap any tier below to switch the whole plan!</div>';
+  var diff=i.budget-t,pct=Math.round(t/i.budget*100);
+  if(diff>=0){
+    return '<div class="banner safe">✅ <b>Budget is safe!</b> Your '+fmt(i.budget)+' covers this trip with <b>'+fmt(diff)+'</b> to spare ('+pct+'% used).<div class="meter"><i style="width:'+Math.min(100,pct)+'%"></i></div></div>';
+  }
+  var fitTiers=state.tierPlans.map(function(p,idx){return {p:p,idx:idx};}).filter(function(o){return o.p.sums.total<=i.budget;});
+  var alt=state.rows.filter(function(r){return r.fits;})[0];
+  var sug='';
+  if(fitTiers.length) sug+='💡 The <b>'+fitTiers.map(function(o){return TIERS[o.idx].emoji+' '+TIERS[o.idx].name;}).join(' / ')+'</b> tier fits your budget here. ';
+  if(alt) sug+='💡 <b>'+alt.d.name+'</b> fits your budget at '+fmt(alt.total)+' — see the destination chips below. ';
+  if(!fitTiers.length&&!alt) sug='💡 Try fewer days, a cheaper tier, a later date, or raise the budget — this is already the cheapest match we have.';
+  return '<div class="banner over">⚠️ <b>Over budget by '+fmt(-diff)+'</b> — estimated '+fmt(t)+' vs your '+fmt(i.budget)+' ('+pct+'%).<div class="meter"><i style="width:100%"></i></div><div class="tips2">'+sug+'</div></div>';
+}
+function heroHTML(){
+  var i=state.inp,r=state.cur,d=r.d,s=state.plan.sums,T=TIERS[i.tier];
+  var badges='<span class="badge">'+d.flag+' '+(d.scope==='local'?'Local pick':'International pick')+'</span>';
+  if(i.vibes.length) badges+='<span class="badge blue">💘 Vibe match '+r.match+'%</span>';
+  else badges+='<span class="badge blue">🎲 Popular surprise pick</span>';
+  if(i.budget) badges+=r.fits?'<span class="badge ok">✅ Within budget</span>':'<span class="badge bad">⚠️ Over budget</span>';
+  return '<section class="glass hero"><div class="hero-top"><div><div class="eyebrow">'+badges+'</div>'+
+    '<h2>'+d.emoji+' '+d.name+', '+d.country+'</h2>'+
+    '<p class="sub">'+esc(i.origin)+' → '+d.name+' ('+d.code+') · '+prettyShort(i.date)+' – '+prettyShort(addDays(i.date,i.days-1))+' · '+i.days+' days / '+s.nights+' nights · '+T.emoji+' '+T.name+'</p></div>'+
+    '<div class="total-box"><span>Estimated all-in (1 traveler)</span><b>'+fmt(s.total)+'</b><small>≈ '+fmt(s.total/i.days)+' per day</small></div></div>'+
+    bannerHTML()+
+    '<div class="hero-actions"><a class="btn btn-blue" target="_blank" rel="noopener" href="'+googleFlightsUrl()+'"><i class="fa-solid fa-plane"></i> Live Google Flights</a>'+
+    '<button class="btn btn-pink" type="button" data-act="save"><i class="fa-solid fa-heart"></i> Save Trip</button>'+
+    '<button class="btn btn-soft" type="button" data-act="pdf"><i class="fa-solid fa-file-pdf"></i> Export as Cute PDF</button></div></section>';
+}
+function altsHTML(){
+  var i=state.inp;
+  var h='<section class="glass card"><h2 class="sec-title"><i class="fa-solid fa-compass"></i> '+(i.vibes.length?'Destinations matching your vibe':'Destination ideas for you')+'</h2><div class="alts">';
+  state.rows.forEach(function(r){
+    var on=r.d.id===state.cur.d.id;
+    var tag=i.budget?(r.fits?'✅ fits':'⚠️ over'):('💘 '+(i.vibes.length?r.match+'% match':'popular'));
+    h+='<button type="button" class="alt'+(on?' on':'')+'" data-act="dest" data-id="'+r.d.id+'"><b>'+r.d.flag+' '+r.d.name+'</b><small>'+fmt(r.total)+'</small><small>'+tag+'</small></button>';
+  });
+  return h+'</div></section>';
+}
+function tierCardsHTML(){
+  var i=state.inp,d=state.cur.d;
+  var h='<section class="glass card"><h2 class="sec-title"><i class="fa-solid fa-scale-balanced"></i> '+(i.budget?'Tier Comparison for '+d.name:'🧭 Explorer Mode: all-in estimates for '+d.name)+'</h2><div class="tier-cards">';
+  state.tierPlans.forEach(function(p,idx){
+    var T=TIERS[idx],s=p.sums,sel=idx===i.tier,badge='';
+    if(i.budget) badge=s.total<=i.budget?'<span class="badge ok">✅ Fits budget</span>':'<span class="badge bad">⚠️ +'+fmt(s.total-i.budget)+'</span>';
+    h+='<div class="tcard'+(sel?' sel':'')+'"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px"><span class="em">'+T.emoji+'</span>'+(sel?'<span class="badge blue">Selected</span>':badge)+'</div>'+
+      '<h4>'+T.name+' <small style="font-family:inherit;font-weight:600;color:var(--mut);font-size:.78rem">· '+T.sub+'</small></h4>'+
+      '<div class="price">'+fmt(s.total)+'</div><div class="hint">≈ '+fmt(s.total/i.days)+' / day</div>'+
+      '<ul><li>✈️ Flights <b>'+fmt(s.flights)+'</b></li><li>🛏️ Lodging <b>'+fmt(s.lodging)+'</b></li><li>🍜 Food <b>'+fmt(s.food)+'</b></li><li>🚇 Transport & tickets <b>'+fmt(s.local)+'</b></li></ul>'+
+      '<button class="btn '+(sel?'btn-soft':'btn-primary')+' btn-sm" type="button" data-act="tier" data-i="'+idx+'">'+(sel?'Currently viewing':'View this tier')+'</button></div>';
+  });
+  return h+'</div></section>';
+}
+function barsHTML(){
+  var s=state.plan.sums,base=s.flights+s.lodging+s.food+s.local;
+  var rows=[['✈️ Flights (round trip)',s.flights,'f1'],['🛏️ Lodging ('+s.nights+' nights)',s.lodging,'f2'],['🍜 Food & drinks',s.food,'f3'],['🚇 Local transport & tickets',s.local,'f4']];
+  var h='<section class="glass card"><h2 class="sec-title"><i class="fa-solid fa-chart-pie"></i> Budget Breakdown</h2><div class="bars">';
+  rows.forEach(function(r){
+    var p=base?Math.round(r[1]/base*100):0;
+    h+='<div class="bar-row"><div class="top"><span>'+r[0]+'</span><span>'+fmt(r[1])+' · '+p+'%</span></div><div class="track"><div class="fill '+r[2]+'" data-w="'+p+'"></div></div></div>';
+  });
+  return h+'</div><p class="buffer-note">+ 5% contingency buffer '+fmt(s.buffer)+' → <b>Total '+fmt(s.total)+'</b>. Transport & tickets split: '+fmt(s.tr)+' transport + '+fmt(s.tix)+' tickets/night spend.</p></section>';
+}
+function mapCardHTML(){
+  return '<section class="glass card"><h2 class="sec-title"><i class="fa-solid fa-map-location-dot"></i> Interactive Map — Top Spots in '+state.cur.d.name+'</h2><div id="map"></div>'+
+    '<div class="legend"><span>🍜 Food</span><span>🏛️ Sights</span><span>🌅 Sunset / views</span><span>🌙 Night spots</span><span>· Tap a pin for rating & your planned day</span></div></section>';
+}
+function packHTML(){
+  var h='<section class="glass card"><h2 class="sec-title"><i class="fa-solid fa-suitcase-rolling"></i> Smart Packing Checklist</h2><div class="pack-head"><span class="badge blue" id="packCount">0/0 packed</span><div class="track pack-prog"><div class="fill" id="packFill" style="width:0"></div></div><button class="btn btn-soft btn-sm" type="button" data-act="resetpack">Reset</button></div>';
+  state.packing.forEach(function(g){
+    h+='<div class="pack-grp"><h4>'+g.t+'</h4>';
+    g.i.forEach(function(it){h+='<label class="pack-item"><input type="checkbox" data-k="'+esc(it)+'"'+(state.checked[it]?' checked':'')+'><span>'+esc(it)+'</span></label>';});
+    h+='</div>';
+  });
+  return h+'</section>';
+}
+function tipsHTML(){
+  var d=state.cur.d,t=d.tips,ss=state.season;
+  var rows=[['🚨','Emergency numbers',t.e],['🔌','Electricity & sockets',t.p],['💱','Currency',d.cur],['🙏','Tipping customs',t.t],['⚠️','Scam & safety alerts',t.s],['🌤️','Weather around '+prettyShort(state.inp.date),ss.txt+' ('+ss.temp+')'],['🕌','Culture & etiquette',t.c]];
+  var h='<section class="glass card"><h2 class="sec-title"><i class="fa-solid fa-shield-heart"></i> Emergency & Cultural Tips</h2>';
+  rows.forEach(function(r){h+='<div class="tip"><div class="ti">'+r[0]+'</div><div><b>'+r[1]+'</b><span>'+esc(r[2])+'</span></div></div>';});
+  return h+'</section>';
+}
+function slotHTML(s){
+  var tr=s.tr,c='';
+  if(s.t==='h') c='<span class="mc free">😴 Lodging already counted in budget</span>';
+  else{
+    if(s.meal) c+='<span class="mc">🍽️ Meal '+fmt(s.meal)+'</span>';
+    if(s.tix) c+='<span class="mc">🎟️ '+(s.t==='n'?'Night spend ':'Ticket ')+fmt(s.tix)+'</span>';
+    if(!s.meal&&!s.tix) c+='<span class="mc free">🆓 Free entry</span>';
+  }
+  var rate=s.t==='h'?'⭐ '+s.r.toFixed(1)+'/5 · '+s.rv+'K+ stay reviews (avg for this tier)':ratingTxt(s.r,s.rv);
+  return '<div class="slot"><div class="tm"><b>'+s.time+'</b></div><div class="sbody"><span class="tag t-'+s.t+'">'+TAGNAME[s.t]+' '+s.label+'</span><h4>'+esc(s.name)+'</h4><div class="rate">'+rate+'</div><div class="meta">'+
+    '<span class="mc tr">'+trEmoji(tr.mode)+' '+esc(tr.mode)+' · '+(tr.cost?fmt(tr.cost):'Free')+' · '+tr.mins+' min</span>'+c+
+    (s.t==='h'?'':'<a class="mc link" target="_blank" rel="noopener" href="'+mapsLink(s.lat,s.lng)+'">📍 Map</a>')+'</div></div></div>';
+}
+function dayHTML(day){
+  var h='<div class="day-head"><h3>🗓️ Day '+day.n+' · '+pretty(day.date)+'</h3><span class="badge">Day total '+fmt(day.total)+'</span></div>';
+  if(day.note) h+='<div class="day-note">'+day.note+'</div>';
+  h+='<div class="timeline">'+day.slots.map(slotHTML).join('')+'</div><div class="day-foot">Day '+day.n+' spend (meals + tickets + transport): '+fmt(day.total)+'</div>';
+  return h;
+}
+function itineraryHTML(){
+  var days=state.plan.days;
+  var h='<section class="glass card" id="itin"><h2 class="sec-title"><i class="fa-solid fa-clock"></i> Hour-by-Hour Itinerary <span class="badge blue">07:30 – 22:00</span></h2><div class="day-tabs">';
+  days.forEach(function(dd,i){h+='<button type="button" class="dtab'+(state.activeDay===i?' on':'')+'" data-act="day" data-d="'+i+'">Day '+dd.n+'<small>'+prettyShort(dd.date)+'</small></button>';});
+  if(days.length>1) h+='<button type="button" class="dtab'+(state.activeDay==='all'?' on':'')+'" data-act="day" data-d="all">All days<small>'+days.length+' days</small></button>';
+  h+='</div><div id="itinBody">'+itinBodyHTML()+'</div></section>';
+  return h;
+}
+function itinBodyHTML(){
+  var days=state.plan.days;
+  if(state.activeDay==='all') return days.map(function(dd){return '<div style="margin-bottom:26px">'+dayHTML(dd)+'</div>';}).join('');
+  return dayHTML(days[state.activeDay]);
+}
+function render(){
+  var h=heroHTML()+altsHTML()+tierCardsHTML()+barsHTML()+mapCardHTML()+'<div class="two">'+packHTML()+tipsHTML()+'</div>'+itineraryHTML();
+  $('#dash').innerHTML=h;
+  updatePack();
+  requestAnimationFrame(function(){setTimeout(function(){$$('.fill[data-w]').forEach(function(b){b.style.width=b.dataset.w+'%';});},60);});
+  initMap();
+}
+function updatePack(){
+  var all=[];state.packing.forEach(function(g){all=all.concat(g.i);});
+  var done=all.filter(function(k){return state.checked[k];}).length;
+  var c=$('#packCount'),f=$('#packFill');
+  if(c) c.textContent=done+'/'+all.length+' packed';
+  if(f) f.style.width=(all.length?Math.round(done/all.length*100):0)+'%';
+}
+
+/* ---------- map ---------- */
+var PIN={f:['🍜','#FF85A1'],s:['🏛️','#4EA8DE'],v:['🌅','#FFB86B'],n:['🌙','#9B8CFF']};
+function initMap(){
+  var el=$('#map');if(!el) return;
+  if(typeof L==='undefined'){el.innerHTML='<div class="map-fail">🗺️ The map library could not load.<br>Please check your internet connection and reload.</div>';return;}
+  if(state.map){try{state.map.remove();}catch(e){}state.map=null;}
+  var d=state.cur.d;
+  var m=L.map(el,{scrollWheelZoom:false}).setView([d.lat,d.lng],d.zoom);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(m);
+  var used={};
+  state.plan.days.forEach(function(dd){dd.slots.forEach(function(s){if(!s.sp.fill&&!s.sp.hotel&&!used[s.name]) used[s.name]='Day '+dd.n+' · '+s.time;});});
+  var pts=[];
+  d.sp.forEach(function(s){
+    var p=PIN[s.t];
+    var icon=L.divIcon({className:'pin',html:'<div class="pin-i" style="background:'+p[1]+'"><span>'+p[0]+'</span></div>',iconSize:[34,34],iconAnchor:[17,34],popupAnchor:[0,-30]});
+    var pop='<b>'+esc(s.n)+'</b><br>'+ratingTxt(s.r,s.rv)+'<br>'+(used[s.n]?'📅 Planned: '+used[s.n]+'<br>':'')+'<a target="_blank" rel="noopener" href="'+mapsLink(s.lat,s.lng)+'">Open in Google Maps</a>';
+    L.marker([s.lat,s.lng],{icon:icon,title:s.n}).addTo(m).bindPopup(pop);
+    if(!s.o) pts.push([s.lat,s.lng]);
+  });
+  if(pts.length>1) m.fitBounds(pts,{padding:[30,30],maxZoom:13});
+  state.map=m;
+  setTimeout(function(){if(state.map) state.map.invalidateSize();},300);
+}
+window.addEventListener('resize',function(){if(state.map) state.map.invalidateSize();});
+
+/* ---------- saved trips ---------- */
+function getTrips(){return store('flynext_trips_v1')||[];}
+function setTrips(t){store('flynext_trips_v1',t);}
+function renderSaved(){
+  var t=getTrips();$('#savedCount').textContent=t.length;
+  var el=$('#savedList');
+  if(!t.length){el.innerHTML='<div class="empty"><span class="big">🧸</span>No saved trips yet.<br>Plan one and tap “Save Trip”!</div>';return;}
+  el.innerHTML=t.map(function(x){
+    var d=DEST.filter(function(y){return y.id===x.destId;})[0];
+    var sub=(d?d.flag+' '+d.name:'?')+' · '+prettyShort(x.inputs.date)+' · '+x.inputs.days+'d · '+TIERS[x.inputs.tier].emoji+' '+TIERS[x.inputs.tier].name;
+    return '<div class="trip"><h4>'+esc(x.name)+'</h4><p>'+esc(sub)+'</p><div class="acts">'+
+      '<button class="btn btn-blue btn-sm" type="button" data-act="load" data-id="'+x.id+'">🔄 Load</button>'+
+      '<button class="btn btn-soft btn-sm" type="button" data-act="export" data-id="'+x.id+'">📋 Export JSON</button>'+
+      '<button class="btn btn-soft btn-sm" type="button" data-act="del" data-id="'+x.id+'">🗑️ Delete</button></div></div>';
+  }).join('');
+}
+function openModal(id){$(id).classList.add('open');}
+function closeModals(){$$('.modal.open').forEach(function(m){m.classList.remove('open');});}
+function openSave(){
+  if(!state.cur) return;
+  var n=getTrips().length+1;
+  $('#tripName').value='Rancangan '+n+': '+state.cur.d.name+' '+TIERS[state.inp.tier].name;
+  openModal('#saveModal');
+  setTimeout(function(){$('#tripName').focus();$('#tripName').select();},50);
+}
+function confirmSave(){
+  var name=$('#tripName').value.trim()||('Trip to '+state.cur.d.name);
+  var t=getTrips();
+  t.unshift({id:String(Date.now()),name:name,savedAt:new Date().toISOString(),inputs:state.inp,destId:state.cur.d.id,checked:state.checked});
+  setTrips(t);renderSaved();closeModals();toast('💖 Saved “'+name+'”');
+}
+function loadTrip(id){
+  var x=getTrips().filter(function(t){return t.id===id;})[0];if(!x) return;
+  setForm(x.inputs);state.manual=x.destId;state.checked=x.checked||{};
+  generate(true);toast('🔄 Loaded “'+x.name+'”');
+  if(window.innerWidth<=1000) $('#dash').scrollIntoView({behavior:'smooth'});
+}
+function tripJSON(x){
+  var d=DEST.filter(function(y){return y.id===x.destId;})[0];
+  var plan=computePlan(d,x.inputs,x.inputs.tier);
+  return {app:'FlyNext AI',version:1,name:x.name,savedAt:x.savedAt,inputs:x.inputs,destination:{id:d.id,name:d.name,country:d.country,airport:d.code},
+    budget:plan.sums,packingChecked:Object.keys(x.checked||{}).filter(function(k){return x.checked[k];}),
+    itinerary:plan.days.map(function(dd){return {day:dd.n,date:dd.date,total:dd.total,activities:dd.slots.map(function(s){return {time:s.time,activity:s.name,rating:s.r,reviewsK:s.rv,transport:s.tr.mode,transportCost:s.tr.cost,travelMinutes:s.tr.mins,mealCost:s.meal,ticketCost:s.tix};})};})};
+}
+var delArm=null;
+function delTrip(id,btn){
+  if(delArm!==id){delArm=id;btn.textContent='❗ Sure?';setTimeout(function(){if(delArm===id){delArm=null;renderSaved();}},3000);return;}
+  delArm=null;setTrips(getTrips().filter(function(t){return t.id!==id;}));renderSaved();toast('🗑️ Trip deleted');
+}
+
+/* ---------- printable document ---------- */
+function buildPrintDoc(){
+  var i=state.inp,d=state.cur.d,s=state.plan.sums,T=TIERS[i.tier],base=s.flights+s.lodging+s.food+s.local;
+  var h='<div class="pd"><div class="pd-cover"><div class="pd-brand">✈ FLYNEXT AI · TRAVEL PLAN</div><h1>'+d.emoji+' '+d.name+', '+d.country+'</h1><p>'+esc(i.origin)+' → '+d.name+' ('+d.code+') · '+pretty(i.date)+' – '+pretty(addDays(i.date,i.days-1))+'</p></div>';
+  h+='<div class="pd-grid"><div class="pd-stat"><small>Duration</small><b>'+i.days+' days / '+s.nights+' nights</b></div><div class="pd-stat"><small>Travel tier</small><b>'+T.emoji+' '+T.name+'</b></div><div class="pd-stat"><small>Total estimate</small><b>'+fmt(s.total)+'</b></div><div class="pd-stat"><small>Per day</small><b>'+fmt(s.total/i.days)+'</b></div></div>';
+  if(i.budget) h+='<p style="margin-top:8px"><b>Budget check:</b> '+(s.total<=i.budget?'✅ Safe — '+fmt(i.budget-s.total)+' to spare of your '+fmt(i.budget):'⚠️ Over by '+fmt(s.total-i.budget)+' vs your '+fmt(i.budget))+'</p>';
+  else h+='<p style="margin-top:8px"><b>Mode:</b> 🧭 Explorer (no budget set)</p>';
+  h+='<h2>💰 Budget Breakdown</h2>';
+  [['✈️ Flights',s.flights],['🛏️ Lodging ('+s.nights+' nights)',s.lodging],['🍜 Food & drinks',s.food],['🚇 Transport & tickets',s.local]].forEach(function(r){
+    var p=base?Math.round(r[1]/base*100):0;
+    h+='<div class="pd-bar"><span>'+r[0]+'</span><div class="pd-track"><i style="width:'+p+'%"></i></div><b>'+fmt(r[1])+' ('+p+'%)</b></div>';
+  });
+  h+='<div class="pd-bar"><span>🛟 5% buffer</span><span></span><b>'+fmt(s.buffer)+'</b></div><p><b>TOTAL: '+fmt(s.total)+'</b></p>';
+  h+='<h2>🧳 Packing List</h2><div class="pd-cols">';
+  state.packing.forEach(function(g){h+='<div><h4>'+g.t+'</h4>'+g.i.map(function(it){return '<div>'+(state.checked[it]?'☑':'☐')+' '+esc(it)+'</div>';}).join('')+'</div>';});
+  h+='</div><h2>🚨 Emergency & Cultural Tips</h2><div class="pd-tips">';
+  [['🚨 Emergency',d.tips.e],['🔌 Power',d.tips.p],['💱 Currency',d.cur],['🙏 Tipping',d.tips.t],['⚠️ Scams',d.tips.s],['🌤️ Weather',state.season.txt+' ('+state.season.temp+')'],['🕌 Culture',d.tips.c]].forEach(function(r){h+='<div><b>'+r[0]+':</b> '+esc(r[1])+'</div>';});
+  h+='</div><h2>🗓️ Hour-by-Hour Itinerary</h2>';
+  state.plan.days.forEach(function(dd){
+    h+='<div class="pd-day"><h3><span>Day '+dd.n+' · '+pretty(dd.date)+'</span><span>'+fmt(dd.total)+'</span></h3><table>';
+    dd.slots.forEach(function(sl){
+      var cost=[];if(sl.meal)cost.push('Meal '+fmt(sl.meal));if(sl.tix)cost.push((sl.t==='n'?'Night ':'Ticket ')+fmt(sl.tix));if(!cost.length)cost.push(sl.t==='h'?'—':'Free');
+      h+='<tr><td>'+sl.time+'</td><td><b>'+esc(sl.name)+'</b><br><span style="color:#7b7798">'+sl.label+'</span></td><td>'+(sl.t==='h'?'⭐ '+sl.r.toFixed(1):'⭐ '+sl.r.toFixed(1)+' ('+(sl.rv>=10?Math.round(sl.rv):sl.rv)+'K)')+'</td><td>'+esc(sl.tr.mode)+'<br>'+(sl.tr.cost?fmt(sl.tr.cost):'Free')+' · '+sl.tr.mins+' min</td><td>'+cost.join('<br>')+'</td></tr>';
+    });
+    h+='</table></div>';
+  });
+  h+='<div class="pd-foot">Generated by FlyNext AI 💖 · Estimates only (1 traveler) — verify prices, opening hours & entry rules before you go. Have a magical trip!</div></div>';
+  $('#printDoc').innerHTML=h;
+}
+function exportPdf(){
+  buildPrintDoc();toast('📄 Choose “Save as PDF” in the print dialog');
+  setTimeout(function(){window.print();},350);
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click',function(e){
+  var t=e.target.closest('[data-act],[data-close]');
+  if(e.target.classList&&e.target.classList.contains('modal')){closeModals();return;}
+  if(!t) return;
+  if(t.hasAttribute('data-close')){closeModals();return;}
+  var a=t.dataset.act;
+  if(a==='save') openSave();
+  else if(a==='pdf') exportPdf();
+  else if(a==='dest'){state.manual=t.dataset.id;generate(true);$('#dash').scrollIntoView({behavior:'smooth',block:'start'});}
+  else if(a==='tier'){var ti=+t.dataset.i;$$('input[name=tier]').forEach(function(r){r.checked=(+r.value)===ti;});generate(true);}
+  else if(a==='day'){state.activeDay=t.dataset.d==='all'?'all':+t.dataset.d;
+    $$('.dtab').forEach(function(b){b.classList.toggle('on',String(b.dataset.d)===String(state.activeDay));});
+    $('#itinBody').innerHTML=itinBodyHTML();}
+  else if(a==='resetpack'){state.checked={};$$('.pack-item input').forEach(function(c){c.checked=false;});updatePack();saveDraft();}
+  else if(a==='load') loadTrip(t.dataset.id);
+  else if(a==='export'){var x=getTrips().filter(function(q){return q.id===t.dataset.id;})[0];if(x){downloadBlob('flynext-'+x.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+'.json',JSON.stringify(tripJSON(x),null,2),'application/json');toast('📋 JSON exported');}}
+  else if(a==='del') delTrip(t.dataset.id,t);
+});
+document.addEventListener('change',function(e){
+  if(e.target.matches('.pack-item input')){state.checked[e.target.dataset.k]=e.target.checked;updatePack();saveDraft();}
+});
+document.addEventListener('keydown',function(e){if(e.key==='Escape') closeModals();});
+$('#vibeChips').addEventListener('click',function(e){var c=e.target.closest('.chip');if(!c)return;c.classList.toggle('on');c.setAttribute('aria-pressed',c.classList.contains('on'));});
+$('#planForm').addEventListener('submit',function(e){
+  e.preventDefault();generate(false);
+  if(window.innerWidth<=1000) $('#dash').scrollIntoView({behavior:'smooth'});
+});
+$('#openHub').addEventListener('click',function(){$('#codeSize').textContent=(new Blob([SOURCE_HTML]).size/1024).toFixed(1)+' KB';openModal('#hubModal');});
+$('#confirmSave').addEventListener('click',confirmSave);
+$('#tripName').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();confirmSave();}});
+$('#copyCode').addEventListener('click',function(){copyText(SOURCE_HTML).then(function(ok){toast(ok?'📋 Complete code copied!':'⚠️ Copy blocked — use Download instead');});});
+$('#dlCode').addEventListener('click',function(){downloadBlob('index.html',SOURCE_HTML,'text/html;charset=utf-8');toast('💾 index.html downloaded');});
+
+/* ---------- init ---------- */
+(function init(){
+  var today=ymd(new Date());
+  $('#date').min=today;$('#date').value=defaultDate();
+  var dr=store('flynext_draft_v1');
+  if(dr&&dr.inp){
+    try{
+      var i=dr.inp;
+      if(i.date<today) i.date=defaultDate();
+      if(i.origin&&i.scope&&i.vibes&&i.days&&typeof i.tier==='number'){setForm(i);state.manual=dr.manual||null;state.checked=dr.checked||{};}
+    }catch(e){}
+  }
+  renderSaved();
+  generate(true);
+})();
+})();
+</script>
+</body>
+</html>
