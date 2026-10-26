@@ -1,0 +1,81 @@
+Please write a complete, single-file, production-ready HTML application (standalone index.html) titled "FlyNext AI - Travel Planner & Budget Master". This is an advanced portfolio project featuring a cute pastel pink and soft blue glassmorphism UI that is 100% responsive for desktop, tablet, and mobile.
+
+CRITICAL CODE REQUIREMENTS:
+- Output COMPLETE, FULLY WORKING CODE in a single file containing HTML, inline CSS (<style>), and Vanilla JavaScript (<script>).
+- DO NOT use placeholders, comments like "// add remaining items here", "TODO", or truncated code. Everything must be fully written and functional out-of-the-box.
+- DO NOT include any code export hub or embed modals. The app functions purely as a modern consumer travel application.
+- Use CDN links for external icons and map libraries (FontAwesome 6.4.0, Google Fonts, Leaflet.js).
+
+---
+
+### 1. VISUAL DESIGN SYSTEM & THEME
+- Aesthetics: Soft Pastel Pink (#FF85A1, #FFB3C6, #FFF0F5) and Soft Sky Blue (#4EA8DE, #90E0EF, #E0F4FF) with modern Glassmorphism.
+- UI Details: Translucent white cards (`backdrop-filter: blur(16px)`), subtle borders (`rgba(255, 255, 255, 0.8)`), rounded corners (`border-radius: 24px`), soft drop shadows, Google Fonts 'Plus Jakarta Sans' & 'Fredoka'.
+- Responsive Layout: 2-column CSS Grid desktop view (Left: Controls & Saved Trips; Right: Interactive Dashboard, Maps, & Itinerary), collapsing seamlessly into a single-column layout on mobile.
+
+---
+
+### 2. FORM CONTROLS & HYBRID DESTINATION DISCOVERY
+- Origin City: Text input (default: "Medan").
+- Destination Input (OPTIONAL): Text input where users can type a custom city/country (e.g., "Paris", "Seoul", "Yogyakarta"). If left empty, the app triggers Smart AI Discovery.
+- Scope Selector (Radio/Pill Buttons): "🇮🇩 Local (Indonesia)" vs "🌏 International (Global)".
+- Travel Vibe Filter: Interactive chips (e.g., 🏝️ Beach & Tropical, 🏛️ Culture & Heritage, 🏙️ Modern City & Shopping, ⛰️ Nature & Adventure).
+- Budget Input (Optional - IDR): Optional numerical input. If left empty, triggers "Explorer Mode".
+- Departure Date: Date picker (default set dynamically to 30 days from today).
+- Duration: Number input (default: 4 days).
+- Travel Tier / Vibe: 3 selectable cards (🎒 Backpacker / Budget, ☕ Chill / Aesthetic, 💎 Sultan / Luxury).
+- Main Submit Button: "Plan My Trip Now! ✈️"
+
+---
+
+### 3. NEW FEATURE: INFINITE DESTINATION SHUFFLE (REFRESH BUTTON 🔄)
+- Next to the recommended destination card, include a "Shuffle New Destination 🔄" button.
+- Clicking this button randomly cycles through a vast pool of diverse global & domestic destinations (e.g., Tokyo, Bangkok, Seoul, Singapore, Paris, Danang, Bali, Labuan Bajo, Raja Ampat, Malang), instantly refreshing the entire itinerary, pricing, distance tracker, and map markers!
+
+---
+
+### 4. DYNAMIC CURRENCY & UP-TO-DATE PAYMENT METHOD GUIDANCE
+- Dynamic Currency Converter Widget: Automatically detects the chosen destination and displays the local currency exchange rate relative to IDR (e.g., JPY, THB, KRW, SGD, EUR, USD).
+- Payment Method Badges for Activities: Every activity card clearly displays supported modern payment methods:
+  * 💳 **VISA / Mastercard Contactless**
+  * 📱 **QRIS Cross-Border** (highlighted for ASEAN destinations like Thailand, Malaysia, Singapore)
+  * 💴 **Cash / IC Card Required** (for street food, local markets, or traditional temples)
+
+---
+
+### 5. MULTI-OPTION ITINERARY GENERATOR (PLAN A, B, & C)
+- Once a trip is generated, provide interactive tab switchers above the timeline:
+  * 📍 **Option 1: Classic Highlights & Must-Visit Spots**
+  * 🌿 **Option 2: Hidden Gems & Cultural Chill**
+  * 🛍️ **Option 3: Culinary & Shopping Expedition**
+- Clicking each option dynamically updates the itinerary schedule, budget breakdown, distance calculations, and map markers!
+
+---
+
+### 6. DISTANCE TRACKER & WALK VS. RIDE RECOMMENDATIONS
+- Between every consecutive activity slot, calculate and clearly display:
+  * 📏 **Exact Distance**: (e.g., "850 meters" or "3.5 km").
+  * 🚶 / 🚗 **Recommendation Badge**:
+    - **"Walkable & Scenic" 🚶**: For distances < 1.2 km (indicates pedestrian-friendly, time estimate e.g., 10 mins walk).
+    - **"Vehicle Recommended" 🚗**: For distances > 1.2 km (suggests best transit mode like MRT, Bus, Grab/Gojek, or Scooter Rental with exact fare).
+
+---
+
+### 7. MULTI-TRIP MANAGER & EXPORT TO CUTE PDF
+- "Save Trip" Button: Saves the current itinerary to browser `localStorage` with options to Load or Delete.
+- "Export as Cute PDF" Button: Triggers a dedicated CSS `@media print` layout styled in pastel pink & blue, containing the selected itinerary option, distance breakdown, packing checklist, payment tips, and budget summary.
+
+---
+
+### 8. DEEP HOURLY ITINERARY (07:30 - 22:00) & CROWDSOURCED DATA
+- Rich hourly schedule for each day from morning (07:30) to night (22:00).
+- Every single activity slot must include:
+  * Time (e.g., 07:30, 09:30, 12:30, 15:00, 18:30, 21:00).
+  * Activity & Spot Name (famous crowdsourced places).
+  * Tourist Ratings (e.g., ⭐ 4.9/5).
+  * Distance to Next Spot (e.g., 📏 600m).
+  * Transit Mode & Recommendation (🚶 Walkable vs 🚗 Transit).
+  * Supported Payment Methods (e.g., 📱 QRIS / 💳 Card / 💴 Cash).
+  * Ticket / Meal / Transport Cost Estimate in both local currency & IDR.
+
+Please generate the complete, un-truncated HTML/CSS/JS code now!
