@@ -212,16 +212,6 @@ input:focus{border-color:var(--b5);box-shadow:0 0 0 4px rgba(78,168,222,.18)}
 .mclose{position:absolute;top:14px;right:14px;width:38px;height:38px;border-radius:50%;border:0;background:var(--p1);color:var(--p5);font-size:1rem}
 .mclose:hover{background:var(--p3);color:#fff}
 .hub-actions{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 18px}
-.steps{display:flex;flex-direction:column;gap:12px;counter-reset:s}
-.step{display:grid;grid-template-columns:44px 1fr;gap:12px;background:linear-gradient(135deg,#fff,var(--p1));border:1.5px solid var(--p3);border-radius:18px;padding:14px}
-.step .n{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--p5),var(--b5));color:#fff;display:grid;place-items:center;font-family:'Fredoka',sans-serif;font-size:1.2rem}
-.step b{display:block;margin-bottom:2px}
-.step p{font-size:.88rem;color:var(--mut);font-weight:600}
-.mock{margin-top:9px;background:#fff;border:1.5px solid #e1e6ee;border-radius:12px;padding:10px 12px;font-size:.78rem;font-weight:700;color:#5f6368;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.mock .mt{padding:4px 10px;border-radius:99px;background:#f1f3f4}
-.mock .mt.on{background:#e8f0fe;color:#1a73e8}
-.mock code{background:#f1f3f4;padding:3px 8px;border-radius:8px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.74rem}
-.note{font-size:.82rem;font-weight:600;color:var(--mut);background:var(--b1);border:1px solid var(--b3);border-radius:14px;padding:10px 13px;margin-top:14px}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(30px);background:linear-gradient(90deg,var(--p5),var(--b5));color:#fff;padding:12px 22px;border-radius:99px;font-weight:700;box-shadow:0 12px 28px rgba(78,168,222,.4);opacity:0;pointer-events:none;transition:all .35s;z-index:2000;max-width:92vw;text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
@@ -237,6 +227,26 @@ input:focus{border-color:var(--b5);box-shadow:0 0 0 4px rgba(78,168,222,.18)}
   .mbox{padding:20px 16px}
   .hero-actions .btn{flex:1 1 100%;justify-content:center}
 }
+
+.opt-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+@media(max-width:760px){.opt-tabs{grid-template-columns:1fr}}
+.opt{border:1.5px solid var(--p3);background:rgba(255,255,255,.8);border-radius:20px;padding:12px 14px;text-align:left;transition:all .2s;display:flex;flex-direction:column;gap:2px}
+.opt .oi{font-size:1.45rem;line-height:1.2}
+.opt b{font-family:'Fredoka',sans-serif;font-size:1.02rem}
+.opt small{font-size:.76rem;font-weight:700;color:var(--mut);line-height:1.3}
+.opt:hover{transform:translateY(-3px);box-shadow:0 10px 20px rgba(255,133,161,.25)}
+.opt.on{background:linear-gradient(135deg,var(--p5),var(--b5));color:#fff;border-color:transparent;box-shadow:0 12px 24px rgba(255,133,161,.38)}
+.opt.on small{color:rgba(255,255,255,.93)}
+.opt-desc{font-weight:600;color:var(--mut);font-size:.9rem;margin-bottom:10px}
+.stat-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.leg{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:9px 12px;border-radius:16px;font-size:.78rem;font-weight:700;border:1.5px dashed}
+.leg.walk{background:#e9fbf3;border-color:#9fe3c6}
+.leg.ride{background:var(--b1);border-color:var(--b3)}
+.leg .to{flex:1 1 100%;color:var(--mut);font-weight:700}
+.lgb{padding:3px 11px;border-radius:99px;color:#fff;font-weight:800}
+.leg.walk .lgb{background:var(--ok)}
+.leg.ride .lgb{background:var(--b5)}
+.leg.start{margin:0 0 14px}
 
 /* ---------- Cute printable document ---------- */
 #printDoc{display:none}
@@ -286,7 +296,7 @@ input:focus{border-color:var(--b5);box-shadow:0 0 0 4px rgba(78,168,222,.18)}
         <small>Travel Planner &amp; Budget Master</small>
       </div>
     </div>
-    <button class="btn btn-soft" id="openHub" type="button"><i class="fa-solid fa-code"></i> Code &amp; Export Hub</button>
+    <span class="badge blue"><i class="fa-solid fa-heart"></i> Discover · Plan · Pack</span>
   </header>
 
   <div class="layout">
@@ -377,31 +387,6 @@ input:focus{border-color:var(--b5);box-shadow:0 0 0 4px rgba(78,168,222,.18)}
   </div>
 </div>
 
-<!-- Code & Export Hub -->
-<div class="modal" id="hubModal" role="dialog" aria-modal="true" aria-label="Code and export hub">
-  <div class="mbox glass">
-    <button class="mclose" type="button" data-close aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
-    <h2 class="sec-title"><i class="fa-solid fa-code"></i> Code &amp; Export Hub</h2>
-    <p class="hint" style="font-size:.9rem">This whole app is ONE file (<span id="codeSize">…</span>). Copy it or download it, then show it off in your portfolio.</p>
-    <div class="hub-actions">
-      <button class="btn btn-primary" id="copyCode" type="button">📋 Copy Complete Code</button>
-      <button class="btn btn-blue" id="dlCode" type="button">💾 Download index.html</button>
-    </div>
-    <h3 class="fred" style="margin-bottom:10px">📖 Embed in Google Sites (live portfolio)</h3>
-    <div class="steps">
-      <div class="step"><div class="n">1</div><div><b>Get the code</b><p>Click <b style="display:inline">Copy Complete Code</b> above (or download <code>index.html</code> and open it in a text editor, then copy everything).</p></div></div>
-      <div class="step"><div class="n">2</div><div><b>Open your Google Site</b><p>Go to <b style="display:inline">sites.google.com</b>, open your portfolio site (or create a new one) and select the page where the project should appear.</p></div></div>
-      <div class="step"><div class="n">3</div><div><b>Insert → Embed</b><p>In the right-side panel, open the <b style="display:inline">Insert</b> tab and click <b style="display:inline">Embed</b>.</p>
-        <div class="mock"><span class="mt">Insert</span><span class="mt">Pages</span><span class="mt">Themes</span> → <span class="mt on">📎 Embed</span></div></div></div>
-      <div class="step"><div class="n">4</div><div><b>Choose "Embed code"</b><p>In the popup, switch from the “By URL” tab to the <b style="display:inline">Embed code</b> tab.</p>
-        <div class="mock"><span class="mt">By URL</span><span class="mt on">Embed code</span><code>&lt;html&gt; … paste here … &lt;/html&gt;</code></div></div></div>
-      <div class="step"><div class="n">5</div><div><b>Paste &amp; Insert</b><p>Press <b style="display:inline">Ctrl + V</b> (or Cmd + V) to paste the code, click <b style="display:inline">Next</b>, then <b style="display:inline">Insert</b>.</p></div></div>
-      <div class="step"><div class="n">6</div><div><b>Resize &amp; Publish</b><p>Drag the embed box to full width and make it tall (900px+). Click <b style="display:inline">Publish</b> and share your link. Your visitors can plan trips live! 🎉</p></div></div>
-    </div>
-    <div class="note">💡 If Google Sites says the code is too large, upload <code>index.html</code> to GitHub Pages or Netlify and use <b>Embed → By URL</b> instead. Saved trips live in each visitor's own browser (localStorage). The PDF button works best when the site is opened in its own tab.</div>
-  </div>
-</div>
-
 <div class="toast" id="toast" role="status"></div>
 <div id="printDoc"></div>
 
@@ -409,8 +394,6 @@ input:focus{border-color:var(--b5);box-shadow:0 0 0 4px rgba(78,168,222,.18)}
 <script>
 (function(){
 'use strict';
-/* Capture the page source BEFORE the app renders anything (used by the Code & Export Hub). */
-var SOURCE_HTML = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
 
 /* ---------- helpers ---------- */
 var $ = function(s,r){return (r||document).querySelector(s);};
@@ -444,18 +427,6 @@ function downloadBlob(name,text,type){
   var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;
   document.body.appendChild(a);a.click();
   setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},500);
-}
-function copyText(text){
-  function fallback(){
-    var ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
-    document.body.appendChild(ta);ta.select();var ok=false;
-    try{ok=document.execCommand('copy');}catch(e){}
-    ta.remove();return ok;
-  }
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    return navigator.clipboard.writeText(text).then(function(){return true;},function(){return fallback();});
-  }
-  return Promise.resolve(fallback());
 }
 
 /* ---------- tiers ---------- */
@@ -704,75 +675,145 @@ DEST.forEach(function(d){
   var fs=d.sp.filter(function(s){return s.t==='f';});
   d.avgF=rnd(fs.reduce(function(a,s){return a+s.c;},0)/fs.length);
 });
-var FILL={
-  f:['Neighborhood café & street-food crawl in {d}','Hidden-gem local eatery in {d}','Brunch at a trending {d} café'],
-  s:['Free-roam: local market & backstreets of {d}','Souvenir & craft shopping in {d}','Slow wander through a local {d} neighborhood'],
-  v:['Golden-hour stroll & dinner at a {d} local favorite','Sunset spot hunting around {d}'],
-  n:['Night market or rooftop chill in {d}','Live-music & dessert hop in {d}']
+var FILLS={
+  A:{
+    f:['Neighborhood café & street-food crawl in {d}','Hidden-gem local eatery in {d}','Brunch at a trending {d} café'],
+    s:['Free-roam: local market & backstreets of {d}','Souvenir & craft shopping in {d}','Slow wander through a local {d} neighborhood'],
+    v:['Golden-hour stroll & dinner at a {d} local favorite','Sunset spot hunting around {d}'],
+    n:['Night market or rooftop chill in {d}','Live-music & dessert hop in {d}']
+  },
+  B:{
+    f:['Family-run local eatery in {d}','Traditional breakfast stall in {d}','Hidden courtyard café in {d}'],
+    s:['Heritage lanes & craft workshops of {d}','Local temple / community hall visit in {d}','Artisan village stroll near {d}'],
+    v:['Quiet sunset viewpoint around {d}','Riverside or seaside dusk walk in {d}'],
+    n:['Cultural performance or storytelling night in {d}','Quiet tea-house & stargazing in {d}']
+  },
+  C:{
+    f:['Street-food hopping in {d}','Famous bakery & dessert stop in {d}','Local market food hall in {d}','Chef\'s tasting set at a {d} favorite'],
+    s:['Local mall & souvenir shopping in {d}','Traditional market bargain hunt in {d}','Boutiques & concept stores in {d}'],
+    v:['Rooftop dinner & shopping street stroll in {d}','Sunset snack walk in {d}'],
+    n:['Night market food crawl in {d}','Late-night dessert & souvenir run in {d}']
+  }
 };
-var SLOTS=[['07:30','f','Breakfast'],['09:30','s','Morning Explore'],['12:30','f','Lunch'],['15:00','s','Afternoon Highlight'],['18:30','v','Golden Hour & Dinner'],['21:00','n','Night Vibes'],['22:00','h','Back to Hotel']];
+var OPTS=[
+  {k:'A',icon:'📍',name:'Classic Highlights & Must-Visit Spots',short:'Classic Highlights',desc:'The famous, most-reviewed icons of the destination — the greatest hits everyone talks about.',
+   seq:['f','s','f','s','v','n','h'],labels:['Breakfast','Morning Highlight','Lunch','Afternoon Highlight','Golden Hour & Dinner','Night Vibes','Back to Hotel']},
+  {k:'B',icon:'🌿',name:'Hidden Gems & Cultural Chill',short:'Hidden Gems',desc:'Quieter heritage spots, local eateries and slow cultural moments away from the crowds.',
+   seq:['f','s','f','s','v','n','h'],labels:['Slow Local Breakfast','Cultural Morning','Local Lunch','Hidden-Gem Afternoon','Sunset & Dinner','Night Culture','Back to Hotel']},
+  {k:'C',icon:'🛍️',name:'Culinary & Shopping Expedition',short:'Culinary & Shopping',desc:'Eat your way through the best food stops and shop the markets, malls and souvenir streets.',
+   seq:['f','s','f','s','f','n','h'],labels:['Breakfast Bites','Market & Shopping','Lunch Feast','Shopping Spree','Dinner Feast','Night Market & Dessert','Back to Hotel']}
+];
+var TIMES=['07:30','09:30','12:30','15:00','18:30','21:00','22:00'];
 var TAGNAME={f:'🍜',s:'🏛️',v:'🌅',n:'🌙',h:'🛏️'};
 
-/* ---------- planning engine ---------- */
+/* ---------- distance & transit engine ---------- */
 function ovrTr(o,ti){
   if(ti===2) return {mode:'Private charter · '+o[0],cost:rnd(o[1]*2.2),mins:o[2]};
   if(ti===0) return {mode:o[0],cost:rnd(o[1]*.85),mins:o[2]};
   return {mode:o[0],cost:o[1],mins:o[2]};
 }
-function computePlan(d,inp,ti){
-  var T=TIERS[ti],days=inp.days,nights=Math.max(days-1,0),sel=inp.vibes;
+function haversine(lat1,lng1,lat2,lng2){
+  var R=6371,r=Math.PI/180,dLat=(lat2-lat1)*r,dLng=(lng2-lng1)*r;
+  var x=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*r)*Math.cos(lat2*r)*Math.sin(dLng/2)*Math.sin(dLng/2);
+  return 2*R*Math.asin(Math.sqrt(x));
+}
+function fmtDist(km){
+  if(km<1) return (Math.round(km*100)*10)+' meters';
+  return (Math.round(km*10)/10).toFixed(1)+' km';
+}
+function kmTxt(k){return (Math.round(k*10)/10).toFixed(1)+' km';}
+function fare(x){return Math.round(x/500)*500;}
+/* A "leg" is the trip that ARRIVES at stop `to` from stop `from`. Route distance = straight-line x 1.25. */
+function makeLeg(d,ti,from,to){
+  var T=TIERS[ti],km=Math.max(.05,Math.round(haversine(from.lat,from.lng,to.lat,to.lng)*1.25*100)/100);
+  var ov=to.o||from.o;
+  if(ov){var o=ovrTr(ov,ti);return {km:km,walk:false,mode:o.mode,cost:o.cost,mins:o.mins};}
+  if(km<1.2) return {km:km,walk:true,mode:'Walk',cost:0,mins:Math.max(1,Math.ceil(km/5*60))};
+  var opts=d.tr[T.k],o2=(km>8&&opts.length>1)?opts[1]:opts[0];
+  var f=Math.max(.6,Math.min(2.5,km/5)),tf=Math.max(.4,Math.min(3,km/5));
+  return {km:km,walk:false,mode:o2[0],cost:fare(o2[1]*f),mins:Math.max(5,Math.round(o2[2]*tf)+3)};
+}
+function sortPool(arr,t,oi,sel){
+  var rk=function(s){return sel.length&&sel.indexOf(s.v)>=0?0:1;};
+  var cmp;
+  if(oi===0) cmp=function(a,b){return b.rv-a.rv||b.r-a.r;};
+  else if(oi===1){
+    if(t==='f') cmp=function(a,b){return a.rv-b.rv||b.r-a.r;};
+    else{var cr=function(s){return s.v==='m'?0:(s.v==='n'?1:2);};cmp=function(a,b){return cr(a)-cr(b)||a.rv-b.rv;};}
+  }else{
+    if(t==='f') cmp=function(a,b){return b.r-a.r||b.rv-a.rv;};
+    else{var cc=function(s){return s.v==='c'?0:1;};cmp=function(a,b){return cc(a)-cc(b)||b.rv-a.rv;};}
+  }
+  return arr.map(function(s,i){return {s:s,i:i};}).sort(function(a,b){return rk(a.s)-rk(b.s)||cmp(a.s,b.s)||a.i-b.i;}).map(function(o){return o.s;});
+}
+
+/* ---------- planning engine ---------- */
+function computePlan(d,inp,ti,oi){
+  var T=TIERS[ti],O=OPTS[oi],days=inp.days,nights=Math.max(days-1,0),sel=inp.vibes;
   var pools={f:[],s:[],v:[],n:[]};
   d.sp.forEach(function(s){pools[s.t].push(s);});
-  if(sel.length){
-    Object.keys(pools).forEach(function(k){
-      pools[k]=pools[k].map(function(s,i){return {s:s,i:i,p:sel.indexOf(s.v)>=0?0:1};})
-        .sort(function(a,b){return a.p-b.p||a.i-b.i;}).map(function(o){return o.s;});
-    });
-  }
-  var ptr={f:0,s:0,v:0,n:0};
-  function pick(t){
-    var arr=pools[t],i=ptr[t]++;
-    if(i<arr.length) return arr[i];
-    var k=i-arr.length,names=FILL[t],j=(((k*7)%11)-5)/500;
-    return {n:names[k%names.length].replace('{d}',d.name),t:t,lat:d.lat+j,lng:d.lng-j,r:+(4.4-(k%3)*.1).toFixed(1),rv:3+k%5,
+  Object.keys(pools).forEach(function(k){pools[k]=sortPool(pools[k],k,oi,sel);});
+  var fk={f:0,s:0,v:0,n:0},fills=FILLS[O.k];
+  /* Picks among the 4 best-ranked remaining spots the one closest to where you are now (keeps each day geographically tight).
+     The morning slot (anchor) always takes the top-ranked spot so the option keeps its flavour. */
+  function pick(t,prev,anchor){
+    var arr=pools[t];
+    if(arr.length){
+      var idx=0;
+      if(!anchor){
+        var best=1e9,lim=Math.min(4,arr.length);
+        for(var q=0;q<lim;q++){
+          var dd=haversine(prev.lat,prev.lng,arr[q].lat,arr[q].lng)+(arr[q].o?500:0);
+          if(dd<best){best=dd;idx=q;}
+        }
+      }
+      return arr.splice(idx,1)[0];
+    }
+    var k=fk[t]++,names=fills[t],j=(((k*7)%11)-5)/500;
+    return {n:names[k%names.length].replace('{d}',d.name),t:t,lat:d.lat+j,lng:d.lng-j*1.3,r:+(4.4-(k%3)*.1).toFixed(1),rv:3+k%5,
       c:t==='f'?d.avgF:(t==='n'?rnd(d.avgF*.8):0),v:'',o:null,fill:true};
   }
+  var hotel={n:'your hotel',lat:d.lat,lng:d.lng,o:null};
   var out=[];
   for(var di=0;di<days;di++){
-    var slots=[];
-    for(var si=0;si<SLOTS.length;si++){
-      var time=SLOTS[si][0],t=SLOTS[si][1],label=SLOTS[si][2],sp,tr,meal=0,tix=0;
+    var slots=[],prev=hotel;
+    for(var si=0;si<7;si++){
+      var t=O.seq[si],sp,meal=0,tix=0;
       if(t==='h') sp={n:'Return to '+T.hotel.replace('{d}',d.name),t:'h',lat:d.lat,lng:d.lng,r:T.hr,rv:T.hrv,c:0,o:null,hotel:true};
-      else sp=pick(t);
-      if(sp.o) tr=ovrTr(sp.o,ti);
-      else{var opts=d.tr[T.k],o=opts[(di*3+si)%opts.length];tr={mode:o[0],cost:o[1],mins:o[2]+((si*5+di*3)%4)*3};}
-      if(t==='f') meal=rnd(sp.c*T.mealX);
+      else sp=pick(t,prev,si===1);
+      var leg=makeLeg(d,ti,prev,sp);prev=sp;
+      if(t==='f') meal=rnd(sp.c*T.mealX*(si===4?1.25:1));
       else if(t==='s') tix=rnd(sp.c*T.tixX);
       else if(t==='v'){tix=rnd(sp.c*T.tixX);meal=rnd(d.avgF*1.3*T.dinnerX);}
       else if(t==='n') tix=rnd(sp.c*T.nightX);
-      slots.push({time:time,t:t,label:label,sp:sp,name:sp.n,r:sp.r,rv:sp.rv,lat:sp.lat,lng:sp.lng,meal:meal,tix:tix,tr:tr});
+      slots.push({time:TIMES[si],t:t,label:O.labels[si],em:(O.k==='C'&&t==='s')?'🛍️':TAGNAME[t],sp:sp,name:sp.n,r:sp.r,rv:sp.rv,lat:sp.lat,lng:sp.lng,meal:meal,tix:tix,leg:leg,next:null});
     }
-    var total=slots.reduce(function(a,s){return a+s.meal+s.tix+s.tr.cost;},0);
+    for(var q=0;q<6;q++) slots[q].next=slots[q+1].leg;
+    var total=0,walkKm=0,rideKm=0;
+    slots.forEach(function(s){
+      total+=s.meal+s.tix+s.leg.cost;
+      if(s.leg.walk) walkKm+=s.leg.km; else rideKm+=s.leg.km;
+    });
     var note='';
     if(di===0&&days>1) note='🛬 Arrival day — assume an early flight landing ~07:00. Drop your bags at the hotel first, then enjoy!';
     else if(di===days-1&&days>1) note='🛫 Departure day — keep the 21:00 slot flexible and head to the airport '+(d.scope==='intl'?'3 hours':'2 hours')+' before your flight.';
     else if(days===1) note='🌞 One-day trip — packed schedule, wear comfy shoes!';
-    out.push({n:di+1,date:addDays(inp.date,di),slots:slots,total:total,note:note});
+    out.push({n:di+1,date:addDays(inp.date,di),slots:slots,total:total,note:note,walkKm:walkKm,rideKm:rideKm});
   }
-  var meals=0,tixs=0,trs=0;
-  out.forEach(function(dd){dd.slots.forEach(function(s){meals+=s.meal;tixs+=s.tix;trs+=s.tr.cost;});});
+  var meals=0,tixs=0,trs=0,wk=0,rk=0;
+  out.forEach(function(dd){wk+=dd.walkKm;rk+=dd.rideKm;dd.slots.forEach(function(s){meals+=s.meal;tixs+=s.tix;trs+=s.leg.cost;});});
   var flights=rnd(d.fl*originFactor(inp.origin)*T.flightX);
   var lodging=nights*d.lod[ti];
   var food=rnd(meals*1.1);
   var local=tixs+trs;
   var sub=flights+lodging+food+local;
   var buffer=rnd(sub*.05);
-  return {days:out,sums:{flights:flights,lodging:lodging,food:food,local:local,tix:tixs,tr:trs,buffer:buffer,total:sub+buffer,nights:nights}};
+  return {days:out,sums:{flights:flights,lodging:lodging,food:food,local:local,tix:tixs,tr:trs,buffer:buffer,total:sub+buffer,nights:nights},stats:{walkKm:wk,rideKm:rk,totalKm:wk+rk}};
 }
-function rankDestinations(inp,ti){
+function rankDestinations(inp,ti,oi){
   var sel=inp.vibes;
   var rows=DEST.filter(function(d){return d.scope===inp.scope&&d.name.toLowerCase()!==inp.origin.trim().toLowerCase();}).map(function(d){
-    var plan=computePlan(d,inp,ti);
+    var plan=computePlan(d,inp,ti,oi);
     var sc=sel.length?sel.reduce(function(a,k){return a+(d.w[k]||0);},0):(d.w.b+d.w.m+d.w.c+d.w.n)/2;
     var mx=sel.length?sel.length*3:5;
     return {d:d,plan:plan,score:sc,match:Math.min(99,Math.round(sc/mx*100)),total:plan.sums.total,fits:inp.budget?plan.sums.total<=inp.budget:null};
@@ -806,7 +847,7 @@ function buildPacking(d,inp,ti,ss){
     intl?'Travel insurance policy (medical + baggage)':'Travel insurance or BPJS card',
     'Copy of this itinerary (PDF)'
   ]});
-  var cl=[n+' tops / tees',n+' sets of underwear & socks',Math.max(2,Math.ceil(n/2))+' bottoms (pants / skirts / shorts)','Comfortable walking shoes','Sleepwear'];
+  var cl=[n+' tops / tees',n+' sets of underwear & socks',Math.max(2,Math.ceil(n/2))+' bottoms (pants / skirts / shorts)','Comfortable walking shoes (lots of walkable legs!)','Sleepwear'];
   if(ss.k==='winter') cl=cl.concat(['Heavy winter coat','Thermal innerwear (top & bottom)','Gloves, scarf & beanie','Warm waterproof boots']);
   else if(ss.k==='cold') cl=cl.concat(['Warm jacket / light coat','Sweater or fleece','Scarf & beanie for evenings']);
   else if(ss.k==='autumn'||ss.k==='spring') cl=cl.concat(['Light jacket or cardigan','Layering shirts']);
@@ -839,7 +880,7 @@ function buildPacking(d,inp,ti,ss){
 }
 
 /* ---------- state ---------- */
-var state={inp:null,rows:null,cur:null,plan:null,tierPlans:null,manual:null,activeDay:0,checked:{},map:null,packing:null,season:null,lastName:null};
+var state={inp:null,rows:null,cur:null,plan:null,tierPlans:null,manual:null,opt:0,activeDay:0,checked:{},map:null,layer:null,packing:null,season:null};
 
 function readForm(){
   var bud=parseInt($('#budget').value,10);
@@ -856,17 +897,17 @@ function setForm(i){
   $('#date').value=i.date;$('#days').value=i.days;
   $$('input[name=tier]').forEach(function(r){r.checked=(+r.value)===i.tier;});
 }
-function saveDraft(){store('flynext_draft_v1',{inp:state.inp,manual:state.manual,checked:state.checked});}
+function saveDraft(){store('flynext_draft_v2',{inp:state.inp,manual:state.manual,opt:state.opt,checked:state.checked});}
 
 function generate(keepManual){
   var inp=readForm();state.inp=inp;
   if(!keepManual) state.manual=null;
-  var ti=inp.tier;
-  var rows=rankDestinations(inp,ti);state.rows=rows;
+  var ti=inp.tier,oi=state.opt;
+  var rows=rankDestinations(inp,ti,oi);state.rows=rows;
   var cur=state.manual?rows.filter(function(r){return r.d.id===state.manual;})[0]:null;
-  if(!cur) {cur=rows[0];state.manual=null;}
+  if(!cur){cur=rows[0];state.manual=null;}
   state.cur=cur;state.plan=cur.plan;
-  state.tierPlans=TIERS.map(function(_,i){return computePlan(cur.d,inp,i);});
+  state.tierPlans=TIERS.map(function(_,i){return computePlan(cur.d,inp,i,oi);});
   state.season=seasonInfo(cur.d,inp.date);
   state.packing=buildPacking(cur.d,inp,ti,state.season);
   state.activeDay=0;
@@ -896,10 +937,11 @@ function bannerHTML(){
   return '<div class="banner over">⚠️ <b>Over budget by '+fmt(-diff)+'</b> — estimated '+fmt(t)+' vs your '+fmt(i.budget)+' ('+pct+'%).<div class="meter"><i style="width:100%"></i></div><div class="tips2">'+sug+'</div></div>';
 }
 function heroHTML(){
-  var i=state.inp,r=state.cur,d=r.d,s=state.plan.sums,T=TIERS[i.tier];
+  var i=state.inp,r=state.cur,d=r.d,s=state.plan.sums,T=TIERS[i.tier],O=OPTS[state.opt];
   var badges='<span class="badge">'+d.flag+' '+(d.scope==='local'?'Local pick':'International pick')+'</span>';
   if(i.vibes.length) badges+='<span class="badge blue">💘 Vibe match '+r.match+'%</span>';
   else badges+='<span class="badge blue">🎲 Popular surprise pick</span>';
+  badges+='<span class="badge">'+O.icon+' Option '+(state.opt+1)+': '+O.short+'</span>';
   if(i.budget) badges+=r.fits?'<span class="badge ok">✅ Within budget</span>':'<span class="badge bad">⚠️ Over budget</span>';
   return '<section class="glass hero"><div class="hero-top"><div><div class="eyebrow">'+badges+'</div>'+
     '<h2>'+d.emoji+' '+d.name+', '+d.country+'</h2>'+
@@ -928,25 +970,25 @@ function tierCardsHTML(){
     if(i.budget) badge=s.total<=i.budget?'<span class="badge ok">✅ Fits budget</span>':'<span class="badge bad">⚠️ +'+fmt(s.total-i.budget)+'</span>';
     h+='<div class="tcard'+(sel?' sel':'')+'"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px"><span class="em">'+T.emoji+'</span>'+(sel?'<span class="badge blue">Selected</span>':badge)+'</div>'+
       '<h4>'+T.name+' <small style="font-family:inherit;font-weight:600;color:var(--mut);font-size:.78rem">· '+T.sub+'</small></h4>'+
-      '<div class="price">'+fmt(s.total)+'</div><div class="hint">≈ '+fmt(s.total/i.days)+' / day</div>'+
+      '<div class="price">'+fmt(s.total)+'</div><div class="hint">≈ '+fmt(s.total/i.days)+' / day · Option '+(state.opt+1)+'</div>'+
       '<ul><li>✈️ Flights <b>'+fmt(s.flights)+'</b></li><li>🛏️ Lodging <b>'+fmt(s.lodging)+'</b></li><li>🍜 Food <b>'+fmt(s.food)+'</b></li><li>🚇 Transport & tickets <b>'+fmt(s.local)+'</b></li></ul>'+
       '<button class="btn '+(sel?'btn-soft':'btn-primary')+' btn-sm" type="button" data-act="tier" data-i="'+idx+'">'+(sel?'Currently viewing':'View this tier')+'</button></div>';
   });
   return h+'</div></section>';
 }
 function barsHTML(){
-  var s=state.plan.sums,base=s.flights+s.lodging+s.food+s.local;
+  var s=state.plan.sums,base=s.flights+s.lodging+s.food+s.local,O=OPTS[state.opt];
   var rows=[['✈️ Flights (round trip)',s.flights,'f1'],['🛏️ Lodging ('+s.nights+' nights)',s.lodging,'f2'],['🍜 Food & drinks',s.food,'f3'],['🚇 Local transport & tickets',s.local,'f4']];
-  var h='<section class="glass card"><h2 class="sec-title"><i class="fa-solid fa-chart-pie"></i> Budget Breakdown</h2><div class="bars">';
+  var h='<section class="glass card"><h2 class="sec-title"><i class="fa-solid fa-chart-pie"></i> Budget Breakdown <span class="badge">'+O.icon+' Option '+(state.opt+1)+'</span></h2><div class="bars">';
   rows.forEach(function(r){
     var p=base?Math.round(r[1]/base*100):0;
     h+='<div class="bar-row"><div class="top"><span>'+r[0]+'</span><span>'+fmt(r[1])+' · '+p+'%</span></div><div class="track"><div class="fill '+r[2]+'" data-w="'+p+'"></div></div></div>';
   });
-  return h+'</div><p class="buffer-note">+ 5% contingency buffer '+fmt(s.buffer)+' → <b>Total '+fmt(s.total)+'</b>. Transport & tickets split: '+fmt(s.tr)+' transport + '+fmt(s.tix)+' tickets/night spend.</p></section>';
+  return h+'</div><p class="buffer-note">+ 5% contingency buffer '+fmt(s.buffer)+' → <b>Total '+fmt(s.total)+'</b>. Transport & tickets split: '+fmt(s.tr)+' rides between stops + '+fmt(s.tix)+' tickets/night spend.</p></section>';
 }
 function mapCardHTML(){
-  return '<section class="glass card"><h2 class="sec-title"><i class="fa-solid fa-map-location-dot"></i> Interactive Map — Top Spots in '+state.cur.d.name+'</h2><div id="map"></div>'+
-    '<div class="legend"><span>🍜 Food</span><span>🏛️ Sights</span><span>🌅 Sunset / views</span><span>🌙 Night spots</span><span>· Tap a pin for rating & your planned day</span></div></section>';
+  return '<section class="glass card"><h2 class="sec-title"><i class="fa-solid fa-map-location-dot"></i> Interactive Map — '+OPTS[state.opt].icon+' '+OPTS[state.opt].short+' in '+state.cur.d.name+'</h2><div id="map"></div>'+
+    '<div class="legend"><span>🍜 Food</span><span>🏛️ Sights</span><span>🛍️ Shopping</span><span>🌅 Sunset</span><span>🌙 Night</span><span>🛏️ Hotel</span><span>┅ Dashed line = the selected day\'s route</span></div></section>';
 }
 function packHTML(){
   var h='<section class="glass card"><h2 class="sec-title"><i class="fa-solid fa-suitcase-rolling"></i> Smart Packing Checklist</h2><div class="pack-head"><span class="badge blue" id="packCount">0/0 packed</span><div class="track pack-prog"><div class="fill" id="packFill" style="width:0"></div></div><button class="btn btn-soft btn-sm" type="button" data-act="resetpack">Reset</button></div>';
@@ -964,8 +1006,13 @@ function tipsHTML(){
   rows.forEach(function(r){h+='<div class="tip"><div class="ti">'+r[0]+'</div><div><b>'+r[1]+'</b><span>'+esc(r[2])+'</span></div></div>';});
   return h+'</section>';
 }
-function slotHTML(s){
-  var tr=s.tr,c='';
+function legHTML(leg,label){
+  var to=label?'<span class="to">'+label+'</span>':'';
+  if(leg.walk) return '<div class="leg walk">'+to+'<span>📏 '+fmtDist(leg.km)+'</span><span class="lgb">🚶 Walkable &amp; Scenic</span><span>⏱️ ~'+leg.mins+' min walk · Free</span></div>';
+  return '<div class="leg ride">'+to+'<span>📏 '+fmtDist(leg.km)+'</span><span class="lgb">🚗 Vehicle Recommended</span><span>'+trEmoji(leg.mode)+' '+esc(leg.mode)+' · '+(leg.cost?fmt(leg.cost):'Free')+' · '+leg.mins+' min</span></div>';
+}
+function slotHTML(s,nextSlot){
+  var c='';
   if(s.t==='h') c='<span class="mc free">😴 Lodging already counted in budget</span>';
   else{
     if(s.meal) c+='<span class="mc">🍽️ Meal '+fmt(s.meal)+'</span>';
@@ -973,19 +1020,25 @@ function slotHTML(s){
     if(!s.meal&&!s.tix) c+='<span class="mc free">🆓 Free entry</span>';
   }
   var rate=s.t==='h'?'⭐ '+s.r.toFixed(1)+'/5 · '+s.rv+'K+ stay reviews (avg for this tier)':ratingTxt(s.r,s.rv);
-  return '<div class="slot"><div class="tm"><b>'+s.time+'</b></div><div class="sbody"><span class="tag t-'+s.t+'">'+TAGNAME[s.t]+' '+s.label+'</span><h4>'+esc(s.name)+'</h4><div class="rate">'+rate+'</div><div class="meta">'+
-    '<span class="mc tr">'+trEmoji(tr.mode)+' '+esc(tr.mode)+' · '+(tr.cost?fmt(tr.cost):'Free')+' · '+tr.mins+' min</span>'+c+
-    (s.t==='h'?'':'<a class="mc link" target="_blank" rel="noopener" href="'+mapsLink(s.lat,s.lng)+'">📍 Map</a>')+'</div></div></div>';
+  var foot=nextSlot?legHTML(s.next,'➡️ Next: '+esc(nextSlot.name)):'<div class="leg walk"><span class="to" style="margin:0">🌙 End of the day — rest well! Tomorrow starts fresh from your hotel.</span></div>';
+  return '<div class="slot"><div class="tm"><b>'+s.time+'</b></div><div class="sbody"><span class="tag t-'+s.t+'">'+s.em+' '+s.label+'</span><h4>'+esc(s.name)+'</h4><div class="rate">'+rate+'</div><div class="meta">'+c+
+    (s.t==='h'?'':'<a class="mc link" target="_blank" rel="noopener" href="'+mapsLink(s.lat,s.lng)+'">📍 Map</a>')+'</div>'+foot+'</div></div>';
 }
 function dayHTML(day){
   var h='<div class="day-head"><h3>🗓️ Day '+day.n+' · '+pretty(day.date)+'</h3><span class="badge">Day total '+fmt(day.total)+'</span></div>';
   if(day.note) h+='<div class="day-note">'+day.note+'</div>';
-  h+='<div class="timeline">'+day.slots.map(slotHTML).join('')+'</div><div class="day-foot">Day '+day.n+' spend (meals + tickets + transport): '+fmt(day.total)+'</div>';
+  h+=legHTML(day.slots[0].leg,'🏨 Start: your hotel → '+esc(day.slots[0].name)).replace('class="leg ','class="leg start ');
+  h+='<div class="timeline">'+day.slots.map(function(s,i){return slotHTML(s,day.slots[i+1]);}).join('')+'</div>';
+  h+='<div class="day-foot">🚶 '+kmTxt(day.walkKm)+' on foot · 🚗 '+kmTxt(day.rideKm)+' by vehicle · Day '+day.n+' spend: '+fmt(day.total)+'</div>';
   return h;
 }
 function itineraryHTML(){
-  var days=state.plan.days;
-  var h='<section class="glass card" id="itin"><h2 class="sec-title"><i class="fa-solid fa-clock"></i> Hour-by-Hour Itinerary <span class="badge blue">07:30 – 22:00</span></h2><div class="day-tabs">';
+  var days=state.plan.days,O=OPTS[state.opt],st=state.plan.stats;
+  var h='<section class="glass card" id="itin"><h2 class="sec-title"><i class="fa-solid fa-clock"></i> Hour-by-Hour Itinerary <span class="badge blue">07:30 – 22:00</span></h2><div class="opt-tabs">';
+  OPTS.forEach(function(o,i){h+='<button type="button" class="opt'+(i===state.opt?' on':'')+'" data-act="opt" data-o="'+i+'"><span class="oi">'+o.icon+'</span><b>Option '+(i+1)+'</b><small>'+o.name+'</small></button>';});
+  h+='</div><p class="opt-desc">'+O.icon+' <b>'+O.name+'</b> — '+O.desc+'</p>';
+  h+='<div class="stat-row"><span class="badge blue">📏 Total route '+kmTxt(st.totalKm)+'</span><span class="badge ok">🚶 '+kmTxt(st.walkKm)+' walkable</span><span class="badge">🚗 '+kmTxt(st.rideKm)+' by vehicle</span><span class="badge">🚇 Rides '+fmt(state.plan.sums.tr)+'</span></div>';
+  h+='<p class="hint" style="margin-bottom:10px">Distances are approximate route lengths (straight-line × 1.25). Under 1.2 km → walk; over 1.2 km → take a vehicle.</p><div class="day-tabs">';
   days.forEach(function(dd,i){h+='<button type="button" class="dtab'+(state.activeDay===i?' on':'')+'" data-act="day" data-d="'+i+'">Day '+dd.n+'<small>'+prettyShort(dd.date)+'</small></button>';});
   if(days.length>1) h+='<button type="button" class="dtab'+(state.activeDay==='all'?' on':'')+'" data-act="day" data-d="all">All days<small>'+days.length+' days</small></button>';
   h+='</div><div id="itinBody">'+itinBodyHTML()+'</div></section>';
@@ -997,7 +1050,7 @@ function itinBodyHTML(){
   return dayHTML(days[state.activeDay]);
 }
 function render(){
-  var h=heroHTML()+altsHTML()+tierCardsHTML()+barsHTML()+mapCardHTML()+'<div class="two">'+packHTML()+tipsHTML()+'</div>'+itineraryHTML();
+  var h=heroHTML()+altsHTML()+tierCardsHTML()+barsHTML()+itineraryHTML()+mapCardHTML()+'<div class="two">'+packHTML()+tipsHTML()+'</div>';
   $('#dash').innerHTML=h;
   updatePack();
   requestAnimationFrame(function(){setTimeout(function(){$$('.fill[data-w]').forEach(function(b){b.style.width=b.dataset.w+'%';});},60);});
@@ -1012,40 +1065,58 @@ function updatePack(){
 }
 
 /* ---------- map ---------- */
-var PIN={f:['🍜','#FF85A1'],s:['🏛️','#4EA8DE'],v:['🌅','#FFB86B'],n:['🌙','#9B8CFF']};
+var PIN={f:['🍜','#FF85A1'],s:['🏛️','#4EA8DE'],v:['🌅','#FFB86B'],n:['🌙','#9B8CFF'],h:['🛏️','#5fd0a5']};
+var ROUTE_COLORS=['#FF85A1','#4EA8DE','#FFB86B','#9B8CFF','#5fd0a5','#ff6f91','#3d9bd1'];
+function pinIcon(em,color){
+  return L.divIcon({className:'pin',html:'<div class="pin-i" style="background:'+color+'"><span>'+em+'</span></div>',iconSize:[34,34],iconAnchor:[17,34],popupAnchor:[0,-30]});
+}
 function initMap(){
   var el=$('#map');if(!el) return;
   if(typeof L==='undefined'){el.innerHTML='<div class="map-fail">🗺️ The map library could not load.<br>Please check your internet connection and reload.</div>';return;}
-  if(state.map){try{state.map.remove();}catch(e){}state.map=null;}
+  if(state.map){try{state.map.remove();}catch(e){}state.map=null;state.layer=null;}
   var d=state.cur.d;
   var m=L.map(el,{scrollWheelZoom:false}).setView([d.lat,d.lng],d.zoom);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(m);
-  var used={};
-  state.plan.days.forEach(function(dd){dd.slots.forEach(function(s){if(!s.sp.fill&&!s.sp.hotel&&!used[s.name]) used[s.name]='Day '+dd.n+' · '+s.time;});});
-  var pts=[];
-  d.sp.forEach(function(s){
-    var p=PIN[s.t];
-    var icon=L.divIcon({className:'pin',html:'<div class="pin-i" style="background:'+p[1]+'"><span>'+p[0]+'</span></div>',iconSize:[34,34],iconAnchor:[17,34],popupAnchor:[0,-30]});
-    var pop='<b>'+esc(s.n)+'</b><br>'+ratingTxt(s.r,s.rv)+'<br>'+(used[s.n]?'📅 Planned: '+used[s.n]+'<br>':'')+'<a target="_blank" rel="noopener" href="'+mapsLink(s.lat,s.lng)+'">Open in Google Maps</a>';
-    L.marker([s.lat,s.lng],{icon:icon,title:s.n}).addTo(m).bindPopup(pop);
-    if(!s.o) pts.push([s.lat,s.lng]);
-  });
-  if(pts.length>1) m.fitBounds(pts,{padding:[30,30],maxZoom:13});
-  state.map=m;
+  state.map=m;state.layer=L.layerGroup().addTo(m);
+  drawMapLayers();
   setTimeout(function(){if(state.map) state.map.invalidateSize();},300);
+}
+function drawMapLayers(){
+  if(!state.map||!state.layer||typeof L==='undefined') return;
+  var d=state.cur.d,O=OPTS[state.opt],days=state.plan.days,act=state.activeDay;
+  var shown=act==='all'?days:[days[act]];
+  state.layer.clearLayers();
+  var used={},shownNames={};
+  days.forEach(function(dd){dd.slots.forEach(function(s){if(!s.sp.fill&&!s.sp.hotel&&!used[s.name]) used[s.name]={day:dd.n,time:s.time,sp:s.sp,t:s.t,em:s.em};});});
+  shown.forEach(function(dd){dd.slots.forEach(function(s){shownNames[s.name]=true;});});
+  Object.keys(used).forEach(function(k){
+    var u=used[k],p=PIN[u.t],sp=u.sp;
+    var pop='<b>'+esc(sp.n)+'</b><br>'+ratingTxt(sp.r,sp.rv)+'<br>📅 '+O.icon+' Option '+(state.opt+1)+' · Day '+u.day+' · '+u.time+'<br><a target="_blank" rel="noopener" href="'+mapsLink(sp.lat,sp.lng)+'">Open in Google Maps</a>';
+    L.marker([sp.lat,sp.lng],{icon:pinIcon(u.em||p[0],p[1]),title:sp.n,opacity:shownNames[k]?1:.4}).addTo(state.layer).bindPopup(pop);
+  });
+  L.marker([d.lat,d.lng],{icon:pinIcon('🛏️',PIN.h[1]),title:'Hotel area'}).addTo(state.layer).bindPopup('<b>🏨 Your hotel area</b><br>Distances start & end here each day.');
+  var pts=[[d.lat,d.lng]];
+  shown.forEach(function(dd){
+    var route=[[d.lat,d.lng]];
+    dd.slots.forEach(function(s){route.push([s.lat,s.lng]);});
+    L.polyline(route,{color:ROUTE_COLORS[(dd.n-1)%ROUTE_COLORS.length],weight:3,opacity:.85,dashArray:'6 8'}).addTo(state.layer);
+    route.forEach(function(r){pts.push(r);});
+  });
+  if(pts.length>1) state.map.fitBounds(pts,{padding:[30,30],maxZoom:14});
 }
 window.addEventListener('resize',function(){if(state.map) state.map.invalidateSize();});
 
 /* ---------- saved trips ---------- */
-function getTrips(){return store('flynext_trips_v1')||[];}
-function setTrips(t){store('flynext_trips_v1',t);}
+function getTrips(){return store('flynext_trips_v2')||[];}
+function setTrips(t){store('flynext_trips_v2',t);}
 function renderSaved(){
   var t=getTrips();$('#savedCount').textContent=t.length;
   var el=$('#savedList');
   if(!t.length){el.innerHTML='<div class="empty"><span class="big">🧸</span>No saved trips yet.<br>Plan one and tap “Save Trip”!</div>';return;}
   el.innerHTML=t.map(function(x){
     var d=DEST.filter(function(y){return y.id===x.destId;})[0];
-    var sub=(d?d.flag+' '+d.name:'?')+' · '+prettyShort(x.inputs.date)+' · '+x.inputs.days+'d · '+TIERS[x.inputs.tier].emoji+' '+TIERS[x.inputs.tier].name;
+    var o=OPTS[x.opt||0];
+    var sub=(d?d.flag+' '+d.name:'?')+' · '+prettyShort(x.inputs.date)+' · '+x.inputs.days+'d · '+TIERS[x.inputs.tier].emoji+' '+TIERS[x.inputs.tier].name+' · '+o.icon+' Option '+o.k;
     return '<div class="trip"><h4>'+esc(x.name)+'</h4><p>'+esc(sub)+'</p><div class="acts">'+
       '<button class="btn btn-blue btn-sm" type="button" data-act="load" data-id="'+x.id+'">🔄 Load</button>'+
       '<button class="btn btn-soft btn-sm" type="button" data-act="export" data-id="'+x.id+'">📋 Export JSON</button>'+
@@ -1057,28 +1128,30 @@ function closeModals(){$$('.modal.open').forEach(function(m){m.classList.remove(
 function openSave(){
   if(!state.cur) return;
   var n=getTrips().length+1;
-  $('#tripName').value='Rancangan '+n+': '+state.cur.d.name+' '+TIERS[state.inp.tier].name;
+  $('#tripName').value='Rancangan '+n+': '+state.cur.d.name+' '+TIERS[state.inp.tier].name+' Option '+OPTS[state.opt].k;
   openModal('#saveModal');
   setTimeout(function(){$('#tripName').focus();$('#tripName').select();},50);
 }
 function confirmSave(){
   var name=$('#tripName').value.trim()||('Trip to '+state.cur.d.name);
   var t=getTrips();
-  t.unshift({id:String(Date.now()),name:name,savedAt:new Date().toISOString(),inputs:state.inp,destId:state.cur.d.id,checked:state.checked});
+  t.unshift({id:String(Date.now()),name:name,savedAt:new Date().toISOString(),inputs:state.inp,destId:state.cur.d.id,opt:state.opt,checked:state.checked});
   setTrips(t);renderSaved();closeModals();toast('💖 Saved “'+name+'”');
 }
 function loadTrip(id){
   var x=getTrips().filter(function(t){return t.id===id;})[0];if(!x) return;
-  setForm(x.inputs);state.manual=x.destId;state.checked=x.checked||{};
+  setForm(x.inputs);state.manual=x.destId;state.opt=x.opt||0;state.checked=x.checked||{};
   generate(true);toast('🔄 Loaded “'+x.name+'”');
   if(window.innerWidth<=1000) $('#dash').scrollIntoView({behavior:'smooth'});
 }
 function tripJSON(x){
-  var d=DEST.filter(function(y){return y.id===x.destId;})[0];
-  var plan=computePlan(d,x.inputs,x.inputs.tier);
-  return {app:'FlyNext AI',version:1,name:x.name,savedAt:x.savedAt,inputs:x.inputs,destination:{id:d.id,name:d.name,country:d.country,airport:d.code},
-    budget:plan.sums,packingChecked:Object.keys(x.checked||{}).filter(function(k){return x.checked[k];}),
-    itinerary:plan.days.map(function(dd){return {day:dd.n,date:dd.date,total:dd.total,activities:dd.slots.map(function(s){return {time:s.time,activity:s.name,rating:s.r,reviewsK:s.rv,transport:s.tr.mode,transportCost:s.tr.cost,travelMinutes:s.tr.mins,mealCost:s.meal,ticketCost:s.tix};})};})};
+  var d=DEST.filter(function(y){return y.id===x.destId;})[0],oi=x.opt||0;
+  var plan=computePlan(d,x.inputs,x.inputs.tier,oi);
+  return {app:'FlyNext AI',version:2,name:x.name,savedAt:x.savedAt,inputs:x.inputs,option:{index:oi+1,name:OPTS[oi].name},destination:{id:d.id,name:d.name,country:d.country,airport:d.code},
+    budget:plan.sums,distance:{totalKm:+plan.stats.totalKm.toFixed(2),walkKm:+plan.stats.walkKm.toFixed(2),vehicleKm:+plan.stats.rideKm.toFixed(2)},
+    packingChecked:Object.keys(x.checked||{}).filter(function(k){return x.checked[k];}),
+    itinerary:plan.days.map(function(dd){return {day:dd.n,date:dd.date,total:dd.total,activities:dd.slots.map(function(s){return {time:s.time,activity:s.name,rating:s.r,reviewsK:s.rv,mealCost:s.meal,ticketCost:s.tix,
+      distanceFromPreviousKm:s.leg.km,recommendation:s.leg.walk?'Walkable & Scenic':'Vehicle Recommended',transport:s.leg.mode,transportCost:s.leg.cost,travelMinutes:s.leg.mins};})};})};
 }
 var delArm=null;
 function delTrip(id,btn){
@@ -1088,27 +1161,31 @@ function delTrip(id,btn){
 
 /* ---------- printable document ---------- */
 function buildPrintDoc(){
-  var i=state.inp,d=state.cur.d,s=state.plan.sums,T=TIERS[i.tier],base=s.flights+s.lodging+s.food+s.local;
-  var h='<div class="pd"><div class="pd-cover"><div class="pd-brand">✈ FLYNEXT AI · TRAVEL PLAN</div><h1>'+d.emoji+' '+d.name+', '+d.country+'</h1><p>'+esc(i.origin)+' → '+d.name+' ('+d.code+') · '+pretty(i.date)+' – '+pretty(addDays(i.date,i.days-1))+'</p></div>';
+  var i=state.inp,d=state.cur.d,s=state.plan.sums,T=TIERS[i.tier],O=OPTS[state.opt],st=state.plan.stats,base=s.flights+s.lodging+s.food+s.local;
+  var h='<div class="pd"><div class="pd-cover"><div class="pd-brand">✈ FLYNEXT AI · TRAVEL PLAN</div><h1>'+d.emoji+' '+d.name+', '+d.country+'</h1><p>'+esc(i.origin)+' → '+d.name+' ('+d.code+') · '+pretty(i.date)+' – '+pretty(addDays(i.date,i.days-1))+'</p><p style="margin-top:4px">'+O.icon+' Option '+(state.opt+1)+': '+O.name+'</p></div>';
   h+='<div class="pd-grid"><div class="pd-stat"><small>Duration</small><b>'+i.days+' days / '+s.nights+' nights</b></div><div class="pd-stat"><small>Travel tier</small><b>'+T.emoji+' '+T.name+'</b></div><div class="pd-stat"><small>Total estimate</small><b>'+fmt(s.total)+'</b></div><div class="pd-stat"><small>Per day</small><b>'+fmt(s.total/i.days)+'</b></div></div>';
   if(i.budget) h+='<p style="margin-top:8px"><b>Budget check:</b> '+(s.total<=i.budget?'✅ Safe — '+fmt(i.budget-s.total)+' to spare of your '+fmt(i.budget):'⚠️ Over by '+fmt(s.total-i.budget)+' vs your '+fmt(i.budget))+'</p>';
   else h+='<p style="margin-top:8px"><b>Mode:</b> 🧭 Explorer (no budget set)</p>';
-  h+='<h2>💰 Budget Breakdown</h2>';
+  h+='<h2>💰 Budget Summary</h2>';
   [['✈️ Flights',s.flights],['🛏️ Lodging ('+s.nights+' nights)',s.lodging],['🍜 Food & drinks',s.food],['🚇 Transport & tickets',s.local]].forEach(function(r){
     var p=base?Math.round(r[1]/base*100):0;
     h+='<div class="pd-bar"><span>'+r[0]+'</span><div class="pd-track"><i style="width:'+p+'%"></i></div><b>'+fmt(r[1])+' ('+p+'%)</b></div>';
   });
   h+='<div class="pd-bar"><span>🛟 5% buffer</span><span></span><b>'+fmt(s.buffer)+'</b></div><p><b>TOTAL: '+fmt(s.total)+'</b></p>';
-  h+='<h2>🧳 Packing List</h2><div class="pd-cols">';
+  h+='<h2>📏 Distance Breakdown</h2><p><b>Total route:</b> '+kmTxt(st.totalKm)+' · 🚶 '+kmTxt(st.walkKm)+' walkable (&lt; 1.2 km legs) · 🚗 '+kmTxt(st.rideKm)+' by vehicle (&gt; 1.2 km legs)</p><div class="pd-tips">';
+  state.plan.days.forEach(function(dd){h+='<div><b>Day '+dd.n+':</b> 🚶 '+kmTxt(dd.walkKm)+' · 🚗 '+kmTxt(dd.rideKm)+'</div>';});
+  h+='</div><h2>🧳 Packing Checklist</h2><div class="pd-cols">';
   state.packing.forEach(function(g){h+='<div><h4>'+g.t+'</h4>'+g.i.map(function(it){return '<div>'+(state.checked[it]?'☑':'☐')+' '+esc(it)+'</div>';}).join('')+'</div>';});
-  h+='</div><h2>🚨 Emergency & Cultural Tips</h2><div class="pd-tips">';
+  h+='</div><h2>🚨 Local Emergency & Cultural Tips</h2><div class="pd-tips">';
   [['🚨 Emergency',d.tips.e],['🔌 Power',d.tips.p],['💱 Currency',d.cur],['🙏 Tipping',d.tips.t],['⚠️ Scams',d.tips.s],['🌤️ Weather',state.season.txt+' ('+state.season.temp+')'],['🕌 Culture',d.tips.c]].forEach(function(r){h+='<div><b>'+r[0]+':</b> '+esc(r[1])+'</div>';});
-  h+='</div><h2>🗓️ Hour-by-Hour Itinerary</h2>';
+  h+='</div><h2>🗓️ Hour-by-Hour Itinerary — '+O.short+'</h2>';
   state.plan.days.forEach(function(dd){
     h+='<div class="pd-day"><h3><span>Day '+dd.n+' · '+pretty(dd.date)+'</span><span>'+fmt(dd.total)+'</span></h3><table>';
-    dd.slots.forEach(function(sl){
+    h+='<tr><td colspan="5" style="color:#7b7798;font-weight:600">🏨 Start: hotel → '+esc(dd.slots[0].name)+' · '+fmtDist(dd.slots[0].leg.km)+' · '+(dd.slots[0].leg.walk?'🚶 Walkable ('+dd.slots[0].leg.mins+' min)':'🚗 '+esc(dd.slots[0].leg.mode)+' '+(dd.slots[0].leg.cost?fmt(dd.slots[0].leg.cost):'Free')+' · '+dd.slots[0].leg.mins+' min')+'</td></tr>';
+    dd.slots.forEach(function(sl,idx){
       var cost=[];if(sl.meal)cost.push('Meal '+fmt(sl.meal));if(sl.tix)cost.push((sl.t==='n'?'Night ':'Ticket ')+fmt(sl.tix));if(!cost.length)cost.push(sl.t==='h'?'—':'Free');
-      h+='<tr><td>'+sl.time+'</td><td><b>'+esc(sl.name)+'</b><br><span style="color:#7b7798">'+sl.label+'</span></td><td>'+(sl.t==='h'?'⭐ '+sl.r.toFixed(1):'⭐ '+sl.r.toFixed(1)+' ('+(sl.rv>=10?Math.round(sl.rv):sl.rv)+'K)')+'</td><td>'+esc(sl.tr.mode)+'<br>'+(sl.tr.cost?fmt(sl.tr.cost):'Free')+' · '+sl.tr.mins+' min</td><td>'+cost.join('<br>')+'</td></tr>';
+      var nx=sl.next?'➡️ '+esc(dd.slots[idx+1].name)+'<br>📏 '+fmtDist(sl.next.km)+' · '+(sl.next.walk?'🚶 Walkable & Scenic · '+sl.next.mins+' min · Free':'🚗 Vehicle: '+esc(sl.next.mode)+' · '+(sl.next.cost?fmt(sl.next.cost):'Free')+' · '+sl.next.mins+' min'):'🌙 End of day';
+      h+='<tr><td>'+sl.time+'</td><td><b>'+esc(sl.name)+'</b><br><span style="color:#7b7798">'+sl.label+'</span></td><td>⭐ '+sl.r.toFixed(1)+(sl.t==='h'?'':' ('+(sl.rv>=10?Math.round(sl.rv):sl.rv)+'K)')+'</td><td>'+nx+'</td><td>'+cost.join('<br>')+'</td></tr>';
     });
     h+='</table></div>';
   });
@@ -1121,19 +1198,21 @@ function exportPdf(){
 }
 
 /* ---------- events ---------- */
+function regenKeepScroll(){var y=window.scrollY;generate(true);window.scrollTo(0,y);}
 document.addEventListener('click',function(e){
-  var t=e.target.closest('[data-act],[data-close]');
   if(e.target.classList&&e.target.classList.contains('modal')){closeModals();return;}
+  var t=e.target.closest('[data-act],[data-close]');
   if(!t) return;
   if(t.hasAttribute('data-close')){closeModals();return;}
   var a=t.dataset.act;
   if(a==='save') openSave();
   else if(a==='pdf') exportPdf();
   else if(a==='dest'){state.manual=t.dataset.id;generate(true);$('#dash').scrollIntoView({behavior:'smooth',block:'start'});}
-  else if(a==='tier'){var ti=+t.dataset.i;$$('input[name=tier]').forEach(function(r){r.checked=(+r.value)===ti;});generate(true);}
+  else if(a==='tier'){var ti=+t.dataset.i;$$('input[name=tier]').forEach(function(r){r.checked=(+r.value)===ti;});state.manual=state.cur.d.id;regenKeepScroll();}
+  else if(a==='opt'){state.opt=+t.dataset.o;state.manual=state.cur.d.id;regenKeepScroll();}
   else if(a==='day'){state.activeDay=t.dataset.d==='all'?'all':+t.dataset.d;
     $$('.dtab').forEach(function(b){b.classList.toggle('on',String(b.dataset.d)===String(state.activeDay));});
-    $('#itinBody').innerHTML=itinBodyHTML();}
+    $('#itinBody').innerHTML=itinBodyHTML();drawMapLayers();}
   else if(a==='resetpack'){state.checked={};$$('.pack-item input').forEach(function(c){c.checked=false;});updatePack();saveDraft();}
   else if(a==='load') loadTrip(t.dataset.id);
   else if(a==='export'){var x=getTrips().filter(function(q){return q.id===t.dataset.id;})[0];if(x){downloadBlob('flynext-'+x.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+'.json',JSON.stringify(tripJSON(x),null,2),'application/json');toast('📋 JSON exported');}}
@@ -1148,27 +1227,25 @@ $('#planForm').addEventListener('submit',function(e){
   e.preventDefault();generate(false);
   if(window.innerWidth<=1000) $('#dash').scrollIntoView({behavior:'smooth'});
 });
-$('#openHub').addEventListener('click',function(){$('#codeSize').textContent=(new Blob([SOURCE_HTML]).size/1024).toFixed(1)+' KB';openModal('#hubModal');});
 $('#confirmSave').addEventListener('click',confirmSave);
 $('#tripName').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();confirmSave();}});
-$('#copyCode').addEventListener('click',function(){copyText(SOURCE_HTML).then(function(ok){toast(ok?'📋 Complete code copied!':'⚠️ Copy blocked — use Download instead');});});
-$('#dlCode').addEventListener('click',function(){downloadBlob('index.html',SOURCE_HTML,'text/html;charset=utf-8');toast('💾 index.html downloaded');});
 
 /* ---------- init ---------- */
 (function init(){
   var today=ymd(new Date());
   $('#date').min=today;$('#date').value=defaultDate();
-  var dr=store('flynext_draft_v1');
+  var dr=store('flynext_draft_v2');
   if(dr&&dr.inp){
     try{
       var i=dr.inp;
       if(i.date<today) i.date=defaultDate();
-      if(i.origin&&i.scope&&i.vibes&&i.days&&typeof i.tier==='number'){setForm(i);state.manual=dr.manual||null;state.checked=dr.checked||{};}
-    }catch(e){}
+      if(i.origin&&i.scope&&i.vibes&&i.days&&typeof i.tier==='number'){setForm(i);state.manual=dr.manual||null;state.opt=(typeof dr.opt==='number'&&dr.opt>=0&&dr.opt<3)?dr.opt:0;state.checked=dr.checked||{};}
+    }catch(err){}
   }
   renderSaved();
   generate(true);
 })();
+
 })();
 </script>
 </body>
